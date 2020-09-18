@@ -1,0 +1,15 @@
+<i-docsignviewer 
+#viewer
+[toolbarBg]="'#e7edee'"
+[toolbarColor]="'#333333'"
+[showSidebar]="true"
+[showZoomControl]="true"
+[reduceHeight]="41"
+[zoom]="0.8"
+[doclist]="doclist"
+[activedoc]="activedoc"
+(onDoclistselect)="onDocListSelect($event)"
+(onFinished)="onFinished($event)"
+(onCancel)="onCancel($event)"
+(onSignatureCreate)="onSignatureCreate($event)"
+></i-docsignviewer>
