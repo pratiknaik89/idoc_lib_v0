@@ -152,7 +152,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.19';
+    this.version = 'v0.0.20';
   }
 
   autosaving = false;
