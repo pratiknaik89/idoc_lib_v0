@@ -154,6 +154,7 @@ export class iDocsigneditorComponent implements OnInit {
     this.propBehaviour.fontFamily.values = this.options.fonts;
     this.version = 'v0.0.20';
     // this message from master
+    // this is camera branch
   }
 
   autosaving = false;
