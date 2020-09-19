@@ -153,7 +153,7 @@ export class iDocsigneditorComponent implements OnInit {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
     this.version = 'v0.0.20';
-    //
+    // this is camera branch
   }
 
   autosaving = false;
