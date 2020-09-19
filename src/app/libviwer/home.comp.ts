@@ -40,15 +40,7 @@ export class LibViwerComponent implements OnInit {
         //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
         //Add 'implements AfterViewInit' to the class.
         setTimeout(() => {
-            this.viewer.setData(this.pdfSrc, {
-                "1":
-                    { "1600154443849": { "id": "1600154443849", "text": "TextBox", "type": "text", "style": { "top": 155, "left": 194, "width": 100, "fontSize": 12, "fontStyle": "normal", "fontFamily": "Arial", "fontWeight": "normal" }, "extras": { "recipient": { "val": "Doctor", "color": "hsl( 0, 100%, 50%, 0.4)", "extra": ["Doctor"] } }, "dataset": { "name": "1600154443849", "page": 1, "type": "text", "require": true, "fieldtype": "none", "maxlength": 1000 } }, "1600154449648": { "id": "1600154449648", "type": "sign", "style": { "top": 342, "left": 161, "width": 50, "height": 50 }, "extras": { "recipient": { "val": "Patient", "color": "hsl( 180, 100%, 50%, 0.4)", "extra": ["Patient"] } }, "dataset": { "name": "1600154449648", "page": 1, "type": "sign", "require": true } } }, "2": { "1600154457678": { "id": "1600154457678", "text": "TextBox", "type": "text", "style": { "top": 172, "left": 358, "width": 100, "fontSize": 12, "fontStyle": "normal", "fontFamily": "Arial", "fontWeight": "normal" }, "extras": { "recipient": { "val": "Doctor", "color": "hsl( 0, 100%, 50%, 0.4)", "extra": ["Doctor"] } }, "dataset": { "name": "1600154457678", "page": 2, "type": "text", "require": true, "fieldtype": "none", "maxlength": 1000 } }, "1600154460934": { "id": "1600154460934", "type": "sign", "style": { "top": 521, "left": 379, "width": 50, "height": 50 }, "extras": { "recipient": { "val": "Patient", "color": "hsl( 180, 100%, 50%, 0.4)", "extra": ["Patient"] } }, "dataset": { "name": "1600154460934", "page": 2, "type": "sign", "require": true } } }
-            },
-                'Patient', {
-                "1600154449648": {
-                    "value": "https://bucket-cmp2.s3.us-east-2.amazonaws.com/signature/7c7bd170-f746-11ea-b655-029cd58f3b70/signature_1600169264.png"
-                }
-            })
+        this.viewer.setData(this.pdfSrc, {"1":{"1600154173270":{"id":"1600154173270","type":"sign","style":{"top":166,"left":40,"width":50,"height":50},"extras":{"recipient":{"val":"Doctor","color":"hsl( 0, 100%, 50%, 0.4)","extra":["Doctor"]}},"dataset":{"name":"1600154173270","page":1,"type":"sign","require":true}},"1600417040864":{"extras":{"recipient":{"val":"All","extra":["All"]},"ddlprop":{"val":"a;b;c","extra":["a","b","c"],"defval":"a"}},"style":{"left":381,"top":210,"fontFamily":"Arial","fontSize":12,"fontStyle":"normal","fontWeight":"normal","width":100},"dataset":{"name":"1600417040864","type":"ddl","page":1,"require":true},"type":"ddl","id":"1600417040864","text":"Dropdown","val":"a"},"1600417058994":{"extras":{"recipient":{"val":"All","extra":["All"]},"ddlprop":{"val":"p;q;r","extra":["p","q","r"],"defval":""}},"style":{"left":616,"top":226,"fontFamily":"Arial","fontSize":12,"fontStyle":"normal","fontWeight":"normal","width":100},"dataset":{"name":"1600417058994","type":"ddl","page":1,"require":true},"type":"ddl","id":"1600417058994","text":"Dropdown","val":""},"1600418396341":{"extras":{"recipient":{"val":"All","extra":["All"]}},"style":{"left":243,"top":323,"width":80,"height":80},"dataset":{"name":"1600418396341","type":"radio","page":1,"group":"1600418396341","groupids":["1600418396341","1600418396361","1600418397616"],"require":true,"value":""},"type":"radio","id":"1600418396341"},"1600418396361":{"extras":{"recipient":{"val":"All","extra":["All"]}},"style":{"left":243,"top":343,"width":80,"height":80},"dataset":{"name":"1600418396341","type":"radio","page":1,"group":"1600418396341","require":true,"value":""},"type":"radio","id":"1600418396361"},"1600418397616":{"extras":{"recipient":{"val":"All","extra":["All"]}},"style":{"left":243,"top":363,"width":80,"height":80},"dataset":{"name":"1600418396341","type":"radio","page":1,"group":"1600418396341","require":true,"value":""},"type":"radio","id":"1600418397616"}},"2":[]},'All')
 
 
 
@@ -74,8 +66,8 @@ export class LibViwerComponent implements OnInit {
     }
     onFinished(e) {
 
-        console.log(this.viewer.validate('Patient')) 
-        console.log(this.viewer.getValues('Patient'))
+        console.log(this.viewer.validate('All')) 
+        console.log(this.viewer.getValues('All'))
 
     }
 

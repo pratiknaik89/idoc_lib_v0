@@ -1,6 +1,7 @@
 <div id="loader">
     <span>Loading Document...</span>
     <div id="progressbar"></div>
+    <span>{{progress | currency: '' : '' : '1.0-0' }}%</span>
 </div>
 
 <div id="dialog" style="display: none" align="center">
@@ -74,11 +75,12 @@
     <div class="leftbar" [style.height]="'calc(100vh - ' + reduceHeight +'px)'">
         <div class="barTitle">
             <h4 [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">Fields</h4>
-            <app-ddl [items]="recipients" [(selectdItem)]="selectedRecipient.name" (onChanged)="onReccipientChange($event)">
+            <app-ddl [items]="recipients" [(selectdItem)]="selectedRecipient.name"
+                (onChanged)="onReccipientChange($event)">
 
             </app-ddl>
         </div>
-        
+
         <!-- <button (click)="export()">Export</button> -->
         <ul class="toolsListGroup">
             <li *ngFor="let obj of controlsfilter | groupBy:'group'">
@@ -87,7 +89,8 @@
                 <ul class="toolsList">
                     <li *ngFor="let item of obj.value" title="{{item.text}}" style="z-index: 99999;"
                         data-type="{{item.type}}" class="draggable newelement">
-                        <div class="icon"  [ngStyle]="{'border-left': (item.isPro ? '2px dashed #E91E63' : '') }" [style.backgroundColor]="selectedRecipient.color">
+                        <div class="icon" [ngStyle]="{'border-left': (item.isPro ? '2px dashed #E91E63' : '') }"
+                            [style.backgroundColor]="selectedRecipient.color">
                             <i class=" fa {{item.icon}}"></i></div>
                         <span class="text">{{item.text}}</span>
                     </li>
@@ -106,7 +109,8 @@
                 </div>
                 <pdf-viewer [src]="url" [show-all]="true" [original-size]="false" [render-text]="true"
                     style="display: block;" [style.height]="'calc(100vh - ' + reduceHeight +'px)'" [(page)]="page"
-                    [zoom]="zoom" (after-load-complete)="loadComplete($event)" (page-rendered)="pageRendered($event)">
+                    [zoom]="zoom" (after-load-complete)="loadComplete($event)" (page-rendered)="pageRendered($event)"
+                    (on-progress)="onProgress($event)">
                 </pdf-viewer>
             </div>
         </div>
@@ -215,6 +219,9 @@
     <small class="label ">Default Selected</small>
     <select class="control select" style="flex: 1;" (change)="updateExternal($event, 'ddlprop', item)"
         [(ngModel)]="item.defval">
+        <option value="">
+
+        </option>
         <option *ngFor="let it of item.extras" value="{{it}}">
             {{it}}
         </option>

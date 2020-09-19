@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectorRef, NgModule, Output, EventEmitter } from '@angular/core';
 
 import SignaturePad from 'signature_pad';
-import { PDFDocumentProxy, PdfViewerModule } from 'ng2-pdf-viewer';
+import { PDFDocumentProxy, PDFProgressData, PdfViewerModule } from 'ng2-pdf-viewer';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TabsComponent } from './helper/tabs/tabs.comp';
@@ -62,7 +62,7 @@ export class iDocsignviewerComponent implements OnInit {
     listOfInitials: ISign[] = [];
     signList: ISign[] = [];
     selSign: ISign;
-
+    progress = 0;
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
@@ -141,6 +141,12 @@ export class iDocsignviewerComponent implements OnInit {
         return this.externalProp;
     }
 
+    onProgress(progressData: PDFProgressData) {
+
+        this.progress = 30 + (progressData.total / progressData.loaded * 50)
+
+        // do anything with progress data. For example progress indicator
+    }
     getValues(recipient = undefined) {
 
         let values = {};
@@ -204,6 +210,7 @@ export class iDocsignviewerComponent implements OnInit {
 
     setData(pdfUrl, data, visible_recepientKey = '', values = {}) {
         //this.removeAllControls();
+        debugger
         if (visible_recepientKey != '') {
             this.recepientKey = "rec-" + visible_recepientKey;
             this.show = true;
@@ -235,6 +242,13 @@ export class iDocsignviewerComponent implements OnInit {
                     const id = control.dataset.groupids[i];
                     var ctrl: Control = controls[id];
                     control.val = ctrl.dataset.checked ? '1' : '0';
+                }
+            } else if (control.type == "ddl") {
+                var value = values[control.id] && values[control.id].value;
+                if (!(control.val && control.val !== "")) {
+                    if (control.extras.ddlprop && control.extras.ddlprop.defval && control.extras.ddlprop.defval != "") {
+                        control.val = control.extras.ddlprop.defval
+                    }
                 }
             } else {
                 if (values[control.id])
@@ -488,6 +502,9 @@ export class iDocsignviewerComponent implements OnInit {
         if (type == controlType.text) {
             control = this.createTextBox(prop);
         } else if (type == controlType.ddl) {
+            // set default value if there
+
+
             control = this.createDropdown(prop);
         }
         else if (type == controlType.sign) {
@@ -693,9 +710,7 @@ export class iDocsignviewerComponent implements OnInit {
         return prop.id;
     }
 
-    onProgress(e) {
-        console.log('or prog', e);
-    }
+
     totalpages = 0;
     totalpagesarr = [];
     loadComplete(pdf: PDFDocumentProxy): void {
@@ -937,14 +952,14 @@ export class iDocsignviewerComponent implements OnInit {
 
 
         let design = '<select  data-access="' + this.getAccessKey(prop) + '" data-name="' + + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp dropdown ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px">';
+        debugger
         if (prop.extras.ddlprop) {
             if (prop.extras.ddlprop.extra) {
-                if (prop.extras.ddlprop.defval == "") {
-                    prop.extras.ddlprop.defval = prop.extras.ddlprop.extra[0];
-                }
-                design += '<option></option>'
+
+                design += '<option ' + ((prop.val || prop.extras.ddlprop.defval) == "" ? 'selected' : '') + '></option>';
                 for (let i = 0; i < prop.extras.ddlprop.extra.length; i++) {
                     const el = prop.extras.ddlprop.extra[i];
+
                     design += '<option ' + ((prop.val || prop.extras.ddlprop.defval) === el ? 'selected' : '') + '>' + el + '</option>'
                 }
             }

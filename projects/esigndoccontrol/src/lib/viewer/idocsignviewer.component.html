@@ -1,6 +1,7 @@
 <div id="loader">
     <span>Loading Document...</span>
     <div id="progressbar"></div>
+    <span>{{progress | currency: '' : '' : '1.0-0' }}%</span>
 </div>
 
 
@@ -58,7 +59,7 @@
         <!-- <div class="arrow"></div> -->
         <div style="display: flex;flex-direction: column;">
             <div class="barTitle" *ngIf="doclist.length > 0">
-                Document List
+                Document
                 <!-- <input type="radio" name="s" [(ngModel)]="pagesshow" [value]="1" />
                 <label for="Action Required">Action Required</label>
                 <input type="radio" name="s" [(ngModel)]="pagesshow" [value]="0" />
@@ -121,7 +122,7 @@
                         [render-text]="false" style="display: block;"
                         [style.height]="'calc(100vh - ' + reduceHeight +'px)'" [zoom]="zoom"
                         (on-progress)="onProgress($event)" (page-rendered)="pageRendered($event)"
-                        (after-load-complete)="loadComplete($event)">
+                        (after-load-complete)="loadComplete($event)" >
 
                     </pdf-viewer>
                 </div>

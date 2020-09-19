@@ -2,7 +2,7 @@ import {
   Component, OnInit, ViewChild, TemplateRef, EventEmitter,
   ChangeDetectorRef, Input, NgModule, Output
 } from '@angular/core';
-import { PDFDocumentProxy } from 'ng2-pdf-viewer';
+import { PDFDocumentProxy, PDFProgressData } from 'ng2-pdf-viewer';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PdfViewerModule } from 'ng2-pdf-viewer'
@@ -77,6 +77,7 @@ export class iDocsigneditorComponent implements OnInit {
     name: '',
     color: '#ffd65b'
   };
+  progress = 10;
 
   setRecipients(rec_array) {
     this.recipients = [];
@@ -110,7 +111,7 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
   setData(pdfUrl, data) {
-    debugger
+    this.progress = 30
     //this.removeAllControls();
     this.externalProp = data || {};
     this.url = pdfUrl;
@@ -151,7 +152,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.18';
+    this.version = 'v0.0.19';
   }
 
   autosaving = false;
@@ -475,39 +476,18 @@ export class iDocsigneditorComponent implements OnInit {
       this.totalpagesarr.push(i);
       this.showThumbnailCount(i);
     }
+    this.progress = 100;
+    this.zone.markForCheck();
     setTimeout(() => {
       $('#loader').hide();
-    }, 1000);
+    }, 1300);
+  }
 
-
-
-    //     // track the current page
-    //     let currentPage = null;
-    //     pdf.getPage(i).then(p => {
-    //         currentPage = p;
-
-    //         // get the annotations of the current page
-    //         return p.getAnnotations();
-    //     }).then(ann => {
-
-    //         // ugly cast due to missing typescript definitions
-    //         // please contribute to complete @types/pdfjs-dist
-    //         const annotations = (<any>ann) as PDFAnnotationData[];
-
-    //         annotations
-    //             .filter(a => a.subtype === 'Widget') // get the form field annotation only
-    //             .forEach(a => {
-
-    //                 // get the rectangle that represent the single field
-    //                 // and resize it according to the current DPI
-    //                 const fieldRect = currentPage.getViewport(this.dpiRatio)
-    //                                              .convertToViewportRectangle(a.rect);
-
-    //                 // add the corresponding input
-    //                 this.addInput(a, fieldRect);
-    //             });
-    //     });
-    // }
+  onProgress(progressData: PDFProgressData) {
+    
+    this.progress = 30 + (progressData.total / progressData.loaded * 50)
+   
+    // do anything with progress data. For example progress indicator
   }
 
 
