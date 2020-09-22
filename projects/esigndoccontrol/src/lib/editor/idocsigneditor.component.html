@@ -1,6 +1,9 @@
 <div id="loader">
     <span>Loading Document...</span>
-    <div id="progressbar"></div>
+    <!-- <div id="progressbar"></div> -->
+    <div class="meter" style="width: 300px;">
+        <span [style.width]="progress+'%'"></span>
+    </div>
     <span>{{progress | currency: '' : '' : '1.0-0' }}%</span>
 </div>
 

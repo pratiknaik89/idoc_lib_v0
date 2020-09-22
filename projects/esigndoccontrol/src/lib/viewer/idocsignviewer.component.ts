@@ -143,7 +143,7 @@ export class iDocsignviewerComponent implements OnInit {
 
     onProgress(progressData: PDFProgressData) {
 
-        this.progress = 30 + (progressData.total / progressData.loaded * 50)
+        this.progress =   (progressData.loaded * 100) / progressData.total
 
         // do anything with progress data. For example progress indicator
     }
@@ -739,7 +739,13 @@ export class iDocsignviewerComponent implements OnInit {
 
         //     }
         // }
-        $('#loader').hide();
+        setTimeout(() => {
+
+            this.progress = 100;
+            setTimeout(() => {
+                $('#loader').hide();
+            }, 1000);
+        }, 400);
         //$('.ng2-pdf-viewer-container').append($('#arrow'))
 
 

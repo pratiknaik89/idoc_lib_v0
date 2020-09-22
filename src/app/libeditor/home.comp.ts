@@ -17,7 +17,7 @@ export class LibEditorComponent implements OnInit {
         "Doctor",
         "Patients"]
     constructor() { }
-    pdfSrc = "assets/Medical%20Marijuana%20and%20Telemedicine%20Consent%20(Form).pdf";
+    pdfSrc = "https://bucket-cmp2.s3.us-east-2.amazonaws.com/template/Valparaiso_PermitApp_1600752463.pdf";
     ngOnInit(): void {
         setTimeout(() => {
             this.editor.setData(this.pdfSrc,JSON.parse(localStorage.getItem('docdata')));

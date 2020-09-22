@@ -22,8 +22,7 @@ import { CheckBox } from './controls/checkbox.control';
 import { Radio } from './controls/radio.control';
 import { CustomDdlComponent } from './controls/customdropdown';
 import { Constants } from './helper/constants';
-import { element } from 'protractor';
-
+//import { version } from 'package.json'
 declare var $: any;
 
 @Component({
@@ -478,17 +477,20 @@ export class iDocsigneditorComponent implements OnInit {
       this.totalpagesarr.push(i);
       this.showThumbnailCount(i);
     }
-    this.progress = 100;
-    this.zone.markForCheck();
+
     setTimeout(() => {
-      $('#loader').hide();
-    }, 1300);
+
+      this.progress = 100;
+      setTimeout(() => {
+        $('#loader').hide();
+      }, 1000);
+    }, 400);
   }
 
   onProgress(progressData: PDFProgressData) {
-    
-    this.progress = 30 + (progressData.total / progressData.loaded * 50)
-   
+
+    this.progress = (((progressData.loaded * 70) / progressData.total))
+    // console.log(progressData.total, progressData.loaded)
     // do anything with progress data. For example progress indicator
   }
 
