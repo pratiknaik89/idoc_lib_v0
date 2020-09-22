@@ -628,8 +628,9 @@ export class iDocsigneditorComponent implements OnInit {
       }
       prop.dataset.value = prop.dataset.value || '';
       // control = this.createCheckBox(prop);
+      debugger
       control = new CheckBox(prop, style);
-      control.prop.dataset.require = false;
+      control.props.dataset.require = false;
     }
     else if (type == 'radio') {
 
