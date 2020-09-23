@@ -10,6 +10,12 @@
 <div class="content-tool" style="height: 41px;width:100%;"
     [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">
     <div class="toolbar_left" *ngIf="!ismobiledetected">
+        <span style="font-size: 12px;margin-left: 9px;background: #000;
+        padding-left: 10px;padding-right: 10px;border-radius: 10px;
+        color: #cdf700;
+    ">
+            {{version}}
+        </span>
         <div class="btn-group">
             <button class="btn toolbar_button qtip tip-bottom" [ngStyle]="{ 'color':toolbarColor}"
                 style="margin-right:20px;" data-tip="Previous" (click)="prev()"><i class="fa fa-arrow-left"></i>

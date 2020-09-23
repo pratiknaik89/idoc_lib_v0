@@ -115,7 +115,7 @@ export class CustomDdlComponent implements OnInit {
         })
         if (itm)
             return itm.color;
-        return "#fff"   
+        return "#fff"
     }
 
     constructor() {
@@ -159,13 +159,12 @@ export class CustomDdlComponent implements OnInit {
 
 
     setValue(item) {
-        this.selectdItem = item;
+        this.selectdItem = item.name;
         console.log(this.selectdItem)
         this.onChanged.emit(item);
     }
     onItemSelected(item) {
-        debugger
-        this.selectdItem = item;
+        this.selectdItem = item.name;
         this.onChanged.emit(item);
     }
 

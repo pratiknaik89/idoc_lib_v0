@@ -151,7 +151,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.20';
+    this.version = 'v0.0.21';
     // this message from master
     // this is camera branch
   }
@@ -224,6 +224,7 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
   onReccipientChange(item) {
+    debugger
     this.selectedRecipient = item;
     console.log(item)
   }
@@ -488,8 +489,12 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
   onProgress(progressData: PDFProgressData) {
+    if (progressData.loaded > progressData.total) {
+      this.progress = (((progressData.loaded * 70) / progressData.total))
+    } else {
+      this.progress = (((progressData.total * 70) / progressData.loaded))
+    }
 
-    this.progress = (((progressData.loaded * 70) / progressData.total))
     // console.log(progressData.total, progressData.loaded)
     // do anything with progress data. For example progress indicator
   }

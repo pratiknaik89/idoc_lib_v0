@@ -63,10 +63,11 @@ export class iDocsignviewerComponent implements OnInit {
     signList: ISign[] = [];
     selSign: ISign;
     progress = 0;
+    version = '';
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-
+        this.version = 'v0.0.21';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
@@ -142,8 +143,14 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     onProgress(progressData: PDFProgressData) {
+     
+        if (progressData.loaded > progressData.total) {
+            this.progress = (progressData.total * 100) / progressData.loaded
+        } else {
+            this.progress = (progressData.loaded * 100) / progressData.total
+        }
+     
 
-        this.progress =   (progressData.loaded * 100) / progressData.total
 
         // do anything with progress data. For example progress indicator
     }
