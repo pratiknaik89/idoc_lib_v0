@@ -87,7 +87,8 @@ const noop = () => {
         padding-left: 23px;
         font-weight: 600;
         cursor:pointer;
-        
+        position:relative;
+
       }
       .activeitem{
         background-color: #ccc;

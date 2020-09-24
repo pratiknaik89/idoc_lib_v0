@@ -70,6 +70,7 @@ export class iDocsigneditorComponent implements OnInit {
   @Output() onObjectDeselected: EventEmitter<any> = new EventEmitter();
   @Output() onObjectAdded: EventEmitter<any> = new EventEmitter();
   @Output() onObjectRemoved: EventEmitter<any> = new EventEmitter();
+  @Output() onLoadCompleted: EventEmitter<any> = new EventEmitter();
 
   controlSet = {};
   selectedRecipient = {
@@ -224,7 +225,7 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
   onReccipientChange(item) {
-    debugger
+
     this.selectedRecipient = item;
     console.log(item)
   }
@@ -484,17 +485,18 @@ export class iDocsigneditorComponent implements OnInit {
       this.progress = 100;
       setTimeout(() => {
         $('#loader').hide();
+        this.onLoadCompleted.emit('complete')
       }, 1000);
     }, 400);
   }
 
   onProgress(progressData: PDFProgressData) {
+    console.log(progressData.loaded, progressData.total)
     if (progressData.loaded > progressData.total) {
-      this.progress = (((progressData.loaded * 70) / progressData.total))
+      this.progress = 30 + (((progressData.total * 70) / progressData.loaded))
     } else {
-      this.progress = (((progressData.total * 70) / progressData.loaded))
+      this.progress = 30 + (((progressData.loaded * 70) / progressData.total))
     }
-
     // console.log(progressData.total, progressData.loaded)
     // do anything with progress data. For example progress indicator
   }
