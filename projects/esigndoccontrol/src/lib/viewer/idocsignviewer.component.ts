@@ -355,12 +355,15 @@ export class iDocsignviewerComponent implements OnInit {
             } else {
                 this.LastInitialUrl = item
             }
-            // let controls: Control[] = this.getAllControlByType(control.type)
-            // for (let i = 0; i < controls.length; i++) {
-            //     const ctrl: Control = controls[i];
-            //     this.signatureToggle(item.url, control.id)
-            //     ctrl.val = item.url;
-            // }
+            let controls: Control[] = this.getAllControlByType(control.type)
+            for (let i = 0; i < controls.length; i++) {
+                debugger
+                const ctrl: Control = controls[i];
+                if(ctrl.extras.recipient.val == control.extras.recipient.val && ctrl.val){
+                    this.signatureToggle(item.url, ctrl.id)
+                    ctrl.val = item.url;
+                }
+            }
 
         }
     }
