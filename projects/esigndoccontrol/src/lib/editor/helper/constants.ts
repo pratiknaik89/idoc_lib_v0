@@ -14,7 +14,7 @@ export class Constants {
         },
         'fieldtype': {
             'display': 'Field Validate',
-            'values': ['none', 'telephone', 'email', 'number', 'letters', 'date'],
+            'values': ['none', 'date'],
             'type': 'ddl',
             'dtype': 'dataset',
             'cast': 'string',
@@ -158,6 +158,16 @@ export class Constants {
             'append': '',
             'default': '',
             'group': 'Tooltip'
+        },
+        'dateFormat': {
+            'display': 'Format',
+            'values': ['mm-dd-yyyy', 'yyyy-mm-dd', 'dd-mm-yyyy'],
+            'type': 'ddl',
+            'dtype': 'dataset',
+            'cast': 'string',
+            'append': '',
+            'default': 'mm-dd-yyyy',
+            'group': 'Formatting'
         },
         'broptions': {
             'display': 'Type',

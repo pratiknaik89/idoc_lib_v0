@@ -6,7 +6,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TabsComponent } from './helper/tabs/tabs.comp';
 import { TabComponent } from './helper/tabs/tab.comp';
-import { Control, Extras, Dataset, Style, Font, ISign, controlType } from './model/model'
+import { Control, Font, ISign, controlType } from './model/model'
+import { Constants } from './helper/constant';
 
 declare var $: any;
 declare var QRCode: any;
@@ -67,7 +68,7 @@ export class iDocsignviewerComponent implements OnInit {
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-        this.version = 'v0.0.21';
+        this.version = 'v0.0.25';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
@@ -143,13 +144,13 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     onProgress(progressData: PDFProgressData) {
-     
+
         if (progressData.loaded > progressData.total) {
             this.progress = (progressData.total * 100) / progressData.loaded
         } else {
             this.progress = (progressData.loaded * 100) / progressData.total
         }
-     
+
 
 
         // do anything with progress data. For example progress indicator
@@ -157,21 +158,37 @@ export class iDocsignviewerComponent implements OnInit {
     getValues(recipient = undefined) {
 
         let values = {};
-        this.loopEachControl((control: Control) => {
+        this.loopEachControl((control: Control, controls: Control[]) => {
             var _rec = '';
             if (control.extras && control.extras.recipient) {
                 _rec = control.extras.recipient.val;
             }
+
+            // if (control.type === controlType.radio) {
+            //     if (!control.val) {
+            //         for (let i = 0; i < control.dataset.groupids.length; i++) {
+            //             const id = control.dataset.groupids[i];
+            //             var ctrl: Control = controls[id];
+            //             if (ctrl.dataset.checked == true) {
+            //                 control.val = ;
+            //             }
+            //         }
+
+            //     }
+            // }
+
             if (recipient) {
                 if (_rec === recipient)
                     values[control.id] = {
                         'name': control.dataset.name,
-                        'val': control.val
+                        'val': control.val,
+                        'type': control.type
                     }
             } else {
                 values[control.id] = {
                     'name': control.dataset.name,
-                    'val': control.val
+                    'val': control.val,
+                    'type': control.type
                 }
             }
 
@@ -183,7 +200,7 @@ export class iDocsignviewerComponent implements OnInit {
     validate(recipient) {
         let values = [];
         this.loopEachControl((control: Control) => {
-            if (control.dataset.require == true && control.type !== controlType.checkbox) {
+            if (!control.dataset.readonly && control.dataset.require == true && control.type !== controlType.checkbox) {
 
                 var _rec = '';
                 if (control.extras && control.extras.recipient) {
@@ -215,51 +232,78 @@ export class iDocsignviewerComponent implements OnInit {
         return values;
     }
 
-    setData(pdfUrl, data, visible_recepientKey = '', values = {}) {
+    setData(pdfUrl, data, visible_recepientKey = '', values = {}, readOnly = {}) {
         //this.removeAllControls();
-        debugger
         if (visible_recepientKey != '') {
             this.recepientKey = "rec-" + visible_recepientKey;
             this.show = true;
         }
         this.externalProp = data;
+        let _readValues = {};
+        let _values = {};
+        let isValue = false;
+        let isReadvalues = false;
+        if (readOnly && Object.keys(readOnly).length > 0) {
+            _readValues = readOnly;
+            isReadvalues = true;
+        }
         if (values && Object.keys(values).length > 0) {
-            this.setValues(values);
+            isValue = true;
+            _values = values;
+
+        }
+        if (isValue || isReadvalues) {
+            this.setValues(_values, _readValues);
+            // console.log(this.externalProp);
         }
         this.urls = pdfUrl;
     }
 
-    setValues(values) {
-        this.loopEachControl((control: Control, controls: Control) => {
-            if (control.type == "radio") {
-                var value = values[control.id].value;
-                for (let i = 0; i < control.dataset.groupids.length; i++) {
-                    const id = control.dataset.groupids[i];
-                    var ctrl: Control = controls[id];
-                    ctrl.dataset.checked = false;
-                    if (ctrl.dataset.value == value) {
-                        ctrl.dataset.checked = true;
-                    }
-                    control.val = value;
+    setValues(values, readValues) {
 
-                }
-            } else if (control.type == "checkbox") {
-                var value = values[control.id] && values[control.id].value;
-                for (let i = 0; i < control.dataset.groupids.length; i++) {
-                    const id = control.dataset.groupids[i];
-                    var ctrl: Control = controls[id];
-                    control.val = ctrl.dataset.checked ? '1' : '0';
-                }
-            } else if (control.type == "ddl") {
-                var value = values[control.id] && values[control.id].value;
-                if (!(control.val && control.val !== "")) {
-                    if (control.extras.ddlprop && control.extras.ddlprop.defval && control.extras.ddlprop.defval != "") {
-                        control.val = control.extras.ddlprop.defval
+        this.loopEachControl((control: Control, controls: Control) => {
+            let ctrlVal = values[control.id];
+            const ctrlReadValue: Control = readValues[control.id];
+            if (ctrlReadValue) {
+                ctrlVal = ctrlReadValue;
+                control.isviewonly = true;
+            }
+
+            if (ctrlReadValue || ctrlVal) {
+                if (control.type == "radio") {
+
+                    var value = ctrlVal && ctrlVal.value;
+                    for (let i = 0; i < control.dataset.groupids.length; i++) {
+                        const id = control.dataset.groupids[i];
+                        var ctrl: Control = controls[id];
+                        ctrl.isviewonly = control.isviewonly;
+                        ctrl.dataset.checked = false;
+                        if (ctrl.dataset.value == value) {
+                            ctrl.dataset.checked = true;
+                        }
+                        control.val = value;
+
                     }
+                } else if (control.type == "checkbox") {
+                    var value = ctrlVal && ctrlVal.value;
+                    for (let i = 0; i < control.dataset.groupids.length; i++) {
+                        const id = control.dataset.groupids[i];
+                        var ctrl: Control = controls[id];
+                        ctrl.isviewonly = control.isviewonly;
+                        control.val = ctrl.dataset.checked ? '1' : '0';
+                    }
+                } else if (control.type == "ddl") {
+                    var value = ctrlVal && ctrlVal.value;
+                    if (!(control.val && control.val !== "")) {
+                        if (control.extras.ddlprop && control.extras.ddlprop.defval && control.extras.ddlprop.defval != "") {
+                            control.val = control.extras.ddlprop.defval
+                        }
+                    }
+                } else {
+                    var value = ctrlVal && ctrlVal.value;
+                    control.val = value;
                 }
-            } else {
-                if (values[control.id])
-                    control.val = values[control.id].value;
+
             }
         });
     }
@@ -304,12 +348,19 @@ export class iDocsignviewerComponent implements OnInit {
         if (status) {
             $("#signaturepad").dialog('close');
             this.selectedSign(item);
-            let controls: Control[] = this.getAllControlByType(control.type)
-            for (let i = 0; i < controls.length; i++) {
-                const ctrl: Control = controls[i];
-                this.signatureToggle(item.url, control.id)
-                ctrl.val = item.url;
+            this.signatureToggle(item.url, control.id)
+            control.val = item.url;
+            if (control.type == 'sign') {
+                this.LastSignatureUrl = item
+            } else {
+                this.LastInitialUrl = item
             }
+            // let controls: Control[] = this.getAllControlByType(control.type)
+            // for (let i = 0; i < controls.length; i++) {
+            //     const ctrl: Control = controls[i];
+            //     this.signatureToggle(item.url, control.id)
+            //     ctrl.val = item.url;
+            // }
 
         }
     }
@@ -523,7 +574,18 @@ export class iDocsignviewerComponent implements OnInit {
             const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d)
             const mo = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(d)
             const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d)
-            prop.text = `${mo}/${da}/${ye}`
+            let datec = `${mo}/${da}/${ye}`
+            if (prop.dataset.dateFormat) {
+                if (prop.dataset.dateFormat == 'mm-dd-yyyy') {
+                    datec = `${mo}/${da}/${ye}`
+                } else if (prop.dataset.dateFormat == 'dd-mm-yyyy') {
+                    datec = `${da}/${mo}/${ye}`
+                } else if (prop.dataset.dateFormat == 'yyyy-mm-dd') {
+                    datec = `${ye}/${mo}/${da}`
+                }
+            }
+            prop.val = datec;
+            prop.text = datec;
             control = this.createSignatureDate(prop);
         } else if (type == controlType.note) {
             control = this.createNoteComp(prop);
@@ -545,7 +607,8 @@ export class iDocsignviewerComponent implements OnInit {
         }
 
 
-
+        prop.dataset.readonly = prop.dataset.readonly || false;
+        prop.isviewonly = prop.isviewonly || false;
 
         let that = this;
 
@@ -558,33 +621,60 @@ export class iDocsignviewerComponent implements OnInit {
         // }
 
         if (prop.dataset.type == "text") {
+            if ((!prop.dataset.readonly && !prop.isviewonly)) {
+                if (prop.dataset.fieldtype == 'date') {
+                    $("#" + prop.id).datepicker();
+                } else {
 
-            if (prop.dataset.fieldtype == 'date') {
-                $("#" + prop.id).datepicker();
-            } else {
+                }
 
-            }
+                if (d) {
 
-            if (d) {
+                    // $("#" + prop.id).keypress(function (event) {
+                    //     var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
 
-                // $("#" + prop.id).keypress(function (event) {
-                //     var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
-
-                //     if (!d.test(key)) {
-                //         event.preventDefault();
-                //         return false;
-                //     }
-                // })
+                    //     if (!d.test(key)) {
+                    //         event.preventDefault();
+                    //         return false;
+                    //     }
+                    // })
+                }
             }
         } else if (prop.dataset.type == 'sign' || prop.dataset.type == 'initial') {
-            if (prop.dataset.type == 'sign') {
-                this.signList = this.listOfSigns;
-                this.signaturename = this.signName;
-            } else if (prop.dataset.type == 'initial') {
-                this.signList = this.listOfInitials;
-                this.signaturename = this.initialName;
+            $.contextMenu({
+                selector: "#" + prop.id,
+                trigger: 'none',
+                items: {
+                    change: {
+                        name: "Change",
+                        icon: "fa-clipboard",
+                        callback: function (key, opt) {
+                            that.IsForceOpenSignDialog = true;
+                            that.signatureDialogHandler(null, prop)
+                        }
+                    }
+                    // ,
+                    // clear: {
+                    //     name: "Clear",
+                    //     icon: "fa-clipboard",
+                    //     callback: function (key, opt) {
+                    //         that.IsForceOpenSignDialog = true;
+                    //         that.signatureDialogHandler(null, prop)
+                    //     }
+                    // }
+                }
+            });
+            if ((!prop.dataset.readonly && !prop.isviewonly)) {
+                if (prop.dataset.type == 'sign') {
+                    this.signList = this.listOfSigns;
+                    this.signaturename = this.signName;
+                } else if (prop.dataset.type == 'initial') {
+                    this.signList = this.listOfInitials;
+                    this.signaturename = this.initialName;
+                }
+                that.signatureDialogClose(prop, that);
             }
-            that.signatureDialogClose(prop, that);
+
         } else if (prop.dataset.type == 'qr') {
             this.whenAvailable('QRCode').then(() => {
                 console.log('dddd')
@@ -607,66 +697,66 @@ export class iDocsignviewerComponent implements OnInit {
             // Create space between the barcodes
 
         } else if (prop.dataset.type == 'pic') {
+            if (!prop.dataset.readonly && !prop.isviewonly)
+                $("#" + prop.id).bind('click', function (e) {
+                    Webcam.set({
+                        width: 300,
+                        height: 270,
+                        image_format: 'jpeg',
+                        jpeg_quality: 100
+                    });
+                    Webcam.attach('#camera');
+                    $("#camerapad").dialog({
+                        resizable: false,
+                        height: 450,
+                        width: 'auto',
+                        title: 'Picture',
+                        modal: true,
+                        buttons: [{
+                            text: "Done",
+                            "class": 'bg-success',
+                            click: function () {
+                                Webcam.snap(function (data_uri) {
+                                    $("#" + prop.id).attr('data-val', true);
+                                    $("#" + prop.id).css('background-image', "url('" + data_uri + "'").css('background-size', 'cover').css('background-position', 'center center')
+                                    that.handleInput($("#" + prop.id), prop.type, prop.id, prop, null)
+                                });
+                            }
+                        },
+                        {
+                            text: "Snap",
+                            "class": 'cancelButtonClass',
+                            click: function () {
+                                Webcam.freeze()
+                            }
+                        },
+                        {
+                            text: "Reset",
+                            "class": 'cancelButtonClass',
+                            click: function () {
+                                Webcam.unfreeze()
 
-            $("#" + prop.id).bind('click', function (e) {
-                Webcam.set({
-                    width: 300,
-                    height: 270,
-                    image_format: 'jpeg',
-                    jpeg_quality: 100
+                            }
+                        },
+                        {
+                            text: "Close",
+                            "class": 'cancelButtonClass',
+                            click: function () {
+                                $(this).dialog('close');
+
+                            }
+                        }],
+                        close: function () {
+                            setTimeout(() => {
+                                if (Webcam.stream)
+                                    Webcam.stream.getTracks().forEach(track => track.stop())
+                                Webcam.reset()
+                            }, 1000);
+
+
+                        }
+                    });
                 });
-                Webcam.attach('#camera');
-                $("#camerapad").dialog({
-                    resizable: false,
-                    height: 450,
-                    width: 'auto',
-                    title: 'Picture',
-                    modal: true,
-                    buttons: [{
-                        text: "Done",
-                        "class": 'bg-success',
-                        click: function () {
-                            Webcam.snap(function (data_uri) {
-                                $("#" + prop.id).attr('data-val', true);
-                                $("#" + prop.id).css('background-image', "url('" + data_uri + "'").css('background-size', 'cover').css('background-position', 'center center')
-                                that.handleInput($("#" + prop.id), prop.type, prop.id, prop, null)
-                            });
-                        }
-                    },
-                    {
-                        text: "Snap",
-                        "class": 'cancelButtonClass',
-                        click: function () {
-                            Webcam.freeze()
-                        }
-                    },
-                    {
-                        text: "Reset",
-                        "class": 'cancelButtonClass',
-                        click: function () {
-                            Webcam.unfreeze()
-
-                        }
-                    },
-                    {
-                        text: "Close",
-                        "class": 'cancelButtonClass',
-                        click: function () {
-                            $(this).dialog('close');
-
-                        }
-                    }],
-                    close: function () {
-                        setTimeout(() => {
-                            if (Webcam.stream)
-                                Webcam.stream.getTracks().forEach(track => track.stop())
-                            Webcam.reset()
-                        }, 1000);
-
-
-                    }
-                });
-            });
 
             // Create space between the barcodes
 
@@ -685,32 +775,35 @@ export class iDocsignviewerComponent implements OnInit {
         // });
 
 
+        if (!prop.dataset.readonly && !prop.isviewonly) {
+            $("#" + prop.id).bind('mouseover', function (e) {
+                e.preventDefault();
+                // this.dataset.tip = (prop.dataset.tooltip || '') + '' + (prop.dataset.require ? ' - Require' : '');
 
-        $("#" + prop.id).bind('mouseover', function (e) {
-            e.preventDefault();
-            // this.dataset.tip = (prop.dataset.tooltip || '') + '' + (prop.dataset.require ? ' - Require' : '');
+                this.title = (prop.dataset.tooltip || '') + '' + (prop.dataset.require ? ' Require' : '');
+                // ((this.dataset.type === 'radio' || this.dataset.type === 'checkbox') ? this.dataset.name + ' - ' + this.dataset.value :
+                //     (this.dataset.type === 'text' ? this.dataset.name + '-' + this.dataset.fieldtype : this.dataset.name))
+                //     + '' + (this.dataset.require ? ' - Require' : '');
 
-            this.title = (prop.dataset.tooltip || '') + '' + (prop.dataset.require ? ' Require' : '');
-            // ((this.dataset.type === 'radio' || this.dataset.type === 'checkbox') ? this.dataset.name + ' - ' + this.dataset.value :
-            //     (this.dataset.type === 'text' ? this.dataset.name + '-' + this.dataset.fieldtype : this.dataset.name))
-            //     + '' + (this.dataset.require ? ' - Require' : '');
+                // this.title = (this.dataset.type === 'radio' || this.dataset.type === 'checkbox') ? this.dataset.name + ' - ' + this.dataset.value :
+                //     (this.dataset.type === 'text' ? this.dataset.name + '-' + this.dataset.fieldtype : this.dataset.name);
+                return false;
+            })
+        }
+        if ((!prop.dataset.readonly && !prop.isviewonly)) {
+            $("#" + prop.id).change(function (e) {
+                that.handleInput(e, prop.dataset.type, prop.id, prop)
 
-            // this.title = (this.dataset.type === 'radio' || this.dataset.type === 'checkbox') ? this.dataset.name + ' - ' + this.dataset.value :
-            //     (this.dataset.type === 'text' ? this.dataset.name + '-' + this.dataset.fieldtype : this.dataset.name);
-            return false;
-        })
-
-        $("#" + prop.id).change(function (e) {
-            that.handleInput(e, prop.dataset.type, prop.id, prop)
-
-        })
+            })
+        }
 
 
 
-
-        $("#" + prop.id).tooltip({
-            track: true
-        });
+        if ((!prop.dataset.readonly && !prop.isviewonly)) {
+            $("#" + prop.id).tooltip({
+                track: true
+            });
+        }
 
 
 
@@ -943,29 +1036,37 @@ export class iDocsignviewerComponent implements OnInit {
         // }
     }
 
-    getAccessKey(prop) {
+    getAccessKey(prop: Control) {
         var key = '*';
         try {
-            key = 'rec-' + prop.extras.recipient.val
+            if (prop.isviewonly) {
+                key = 'reci-' + prop.extras.recipient.val
+            } else {
+                key = 'rec-' + prop.extras.recipient.val
+            }
         } catch (error) {
 
         }
         return key;
     }
 
-    createTextBox(prop) {
+    createTextBox(prop: Control) {
         const design = '<input data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
+
+
+        // view only code
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;background-color: transparent;border:0;"  >' + (prop.val || prop.text) + '</div>';
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: null
         }
     }
 
-    createDropdown(prop) {
+    createDropdown(prop: Control) {
 
 
         let design = '<select  data-access="' + this.getAccessKey(prop) + '" data-name="' + + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp dropdown ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px">';
-        debugger
         if (prop.extras.ddlprop) {
             if (prop.extras.ddlprop.extra) {
 
@@ -977,26 +1078,35 @@ export class iDocsignviewerComponent implements OnInit {
                 }
             }
         }
-
         '</select>';
 
+        // view only code
+
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;background-color: transparent;border:0;"  >' + (prop.val || prop.text) + '</div>';
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: null
         }
     }
 
-    createSignature(prop) {
-        debugger
+    createSignature(prop: Control) {
         var path = '';
         if (prop.val && prop.val != "") {
             path = prop.val;
         }
 
-        const design = '<div  data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;"><img src="' + path + '" style="height: 100%;" src=""/><i class="fa fa-pencil"></i></div>';
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;"><img src="' + path + '" style="height: 100%;" crossorigin="Anonymous"/><i class="fa fa-pencil"></i></div>';
+
+
+
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;border:0;"><img src="' + path + '" style="height: 100%;" crossorigin="Anonymous"/></div>';
+
+
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
 
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: null
         }
     }
@@ -1004,64 +1114,103 @@ export class iDocsignviewerComponent implements OnInit {
 
 
 
-    createInitial(prop) {
+    createInitial(prop: Control) {
         var path = '';
         if (prop.val && prop.val != "") {
             path = prop.val;
         }
-        const design = '<div data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;"><img src="' + path + '" style="height: 100%;" src=""/><i class="fa fa-pencil"></i></div>';
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;"><img src="' + path + '" style="height: 100%;" crossorigin="Anonymous"/><i class="fa fa-pencil"></i></div>';
 
+
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + (path != '' ? ' signdone' : '') + ' " style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;border:0;"><img src="' + path + '" style="height: 100%;" crossorigin="Anonymous"/></div>';
+
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: null
         }
     }
 
-    createSignatureDate(prop) {
+    createSignatureDate(prop: Control) {
 
 
-        const design = '<div data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px"><span>' + prop.text + '</span></div>';
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px"><span>' + prop.text + '</span></div>';
+
+
+
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;border:0;"><span>' + prop.text + '</span></div>'
+
         const resize = null
 
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: resize
         }
 
 
     }
 
-    createNoteComp(prop) {
+    createNoteComp(prop: Control) {
         const design = '<textarea data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;resize: none;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</textarea>';
+
+        // view only code
+
+        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;background-color: transparent;border:0;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</div>';
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
+
         const resize = null;
+
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: resize
         }
     }
 
-    createCheckBox(prop) {
+    createCheckBox(prop: Control) {
 
 
         const design = '<div data-access="' + this.getAccessKey(prop) + '" data-value="' + prop.dataset.value + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"  data-group="' + prop.dataset.group + '" id="' + prop.id + '" class="defaultcomp viewercomp checkbox ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;"><input type="checkbox" value="' + prop.dataset.value + '" tabindex="-1" ' + (prop.dataset.checked ? 'checked' : '') + ' ' + (prop.dataset.readonly ? 'readonly' : '') + ' style=" margin:0;padding:0" /></div>';
+
+
+
+        let readonly_design = '<div data-access="' + this.getAccessKey(prop) + '" data-value="' + prop.dataset.value + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"  data-group="' + prop.dataset.group + '" id="' + prop.id + '" class="defaultcomp viewercomp checkbox ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;border:0;"><img src="' + Constants.checkIcon + '" style="height:20px"/></div>';
+
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         const resize = null
 
+        if (isreadonly) {
+            if (!prop.dataset.checked) {
+                readonly_design = '';
+            }
+        }
+
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: resize
         }
 
 
     }
 
-    createRadioButton(prop) {
+    createRadioButton(prop: Control) {
 
 
         const design = '<div data-access="' + this.getAccessKey(prop) + '" data-value="' + prop.dataset.value + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" data-group="' + prop.dataset.group + '" id="' + prop.id + '" class="defaultcomp viewercomp radio ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;"><input type="radio" tabindex="-1" ' + (prop.dataset.checked ? 'checked' : '') + ' ' + (prop.dataset.readonly ? 'readonly' : '') + '  value="' + prop.dataset.value + '" name="r' + prop.dataset.group + '" style="margin:0;padding:0" /></div>';
-        const resize = null
 
+
+        let readonly_design = '<div data-access="' + this.getAccessKey(prop) + '" data-value="' + prop.dataset.value + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" data-group="' + prop.dataset.group + '" id="' + prop.id + '" class="defaultcomp viewercomp radio ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;border:0;"><img src="' + Constants.checkIcon + '" style="height:20px"/></div>';
+
+        const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
+        const resize = null
+        if (isreadonly) {
+
+            if (!prop.dataset.checked) {
+                readonly_design = '';
+            }
+        }
         return {
-            design: design,
+            design: (isreadonly ? readonly_design : design),
             resize: resize
         }
 
@@ -1069,27 +1218,8 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
 
-    createAttachment(prop) {
-        const design = '<div data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><i class="fa fa-paperclip"></i></div>';
-        const resize = null
-
-        return {
-            design: design,
-            resize: resize
-        }
-    }
-
-    createPicure(prop) {
-        const design = '<div  data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><i class="fa fa-camera"></i></div>';
-        const resize = null
-        return {
-            design: design,
-            resize: resize
-        }
-    }
-
-    createLocation(prop) {
-        const design = '<div data-access="' + this.getAccessKey(prop) + '"   data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px; background-image: url(https://static-maps.yandex.ru/1.x/?lang=en-US&ll=' + prop.dataset.lon + ',' + prop.dataset.lat + '&z=8&l=skl,map&size=' + prop.style.width + ',' + (prop.style.height) + '&pt=-73.7638,42.6564,vkbkm)"></div>';
+    createAttachment(prop: Control) {
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><i class="fa fa-paperclip"></i></div>';
         const resize = null
 
         return {
@@ -1098,8 +1228,27 @@ export class iDocsignviewerComponent implements OnInit {
         }
     }
 
-    createQRCode(prop) {
-        const design = '<div data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter" style="display:none;padding:2px;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"> </div>';
+    createPicure(prop: Control) {
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><i class="fa fa-camera"></i></div>';
+        const resize = null
+        return {
+            design: design,
+            resize: resize
+        }
+    }
+
+    createLocation(prop: Control) {
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '"   data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px; background-image: url(https://static-maps.yandex.ru/1.x/?lang=en-US&ll=' + prop.dataset.lon + ',' + prop.dataset.lat + '&z=8&l=skl,map&size=' + prop.style.width + ',' + (prop.style.height) + '&pt=-73.7638,42.6564,vkbkm)"></div>';
+        const resize = null
+
+        return {
+            design: design,
+            resize: resize
+        }
+    }
+
+    createQRCode(prop: Control) {
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter" style="display:none;padding:2px;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"> </div>';
         const resize = null
 
         return {
@@ -1109,8 +1258,8 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
 
-    createBarCode(prop) {
-        const design = '<div data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter" style="display:none;padding:2px;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><img style="height:100%;width:auto;" id="b' + prop.id + '"/> </div>';
+    createBarCode(prop: Control) {
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '"   id="' + prop.id + '" class="defaultcomp viewercomp justifycenter" style="display:none;padding:2px;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><img style="height:100%;width:auto;" id="b' + prop.id + '"/> </div>';
         const resize = null
 
         return {
@@ -1269,54 +1418,21 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
 
-    //Signature Dialog
+    //Signature Dialog 
+    LastSignatureUrl: ISign = {
+        name: '',
+        url: ''
+    };
+    LastInitialUrl: ISign = {
+        name: '',
+        url: ''
+    };
+    IsForceOpenSignDialog = false
     signatureDialogClose(prop, that) {
-        $("#" + prop.id).bind('click', function (e) {
-            if ($("#" + prop.id).has('img')) {
-                that.signaturePad.fromDataURL($("#" + prop.id).find('img').attr('src'));
-            }
-            $("#signaturepad").dialog({
-                resizable: false,
-                height: 400,
-                width: 'auto',
-                title: (prop.type == 'sign' ? 'Signature Pad' : 'Initial Pad'),
-                modal: true,
-                buttons: [{
-                    text: "Create",
-                    "class": 'bg-success',
-                    click: function () {
-                        that.onSignatureCreate.emit({
-                            controlid: prop.id,
-                            props: prop,
-                            name: that.signaturename,
-                            base64: that.signaturePad.toDataURL()
-                        });
-                        prop.val = that.signaturePad.toDataURL();
-                        //$("#" + prop.id).attr('data-val', true);
-                        //$("#" + prop.id).empty().append('<img style="height: 100%;" src="' + that.signaturePad.toDataURL() + '"/>');
-                        //that.handleInput($("#" + prop.id), prop.type, prop.id, prop, null)
-                    }
-                },
-                {
-                    text: "Clear",
-                    "class": 'cancelButtonClass',
-                    click: function () {
-                        that.signaturePad.clear();
-                    }
-                },
-                {
-                    text: "Cancel",
-                    "class": 'cancelButtonClass',
-                    click: function () {
-                        $(this).dialog("close");
-                    }
-                }],
-                close: function () {
-                    that.signaturePad.clear();
 
-                }
-            });
-        });
+        $("#" + prop.id).bind('click', function (e) {
+            that.signatureDialogHandler(e, prop)
+        })
 
     }
 
@@ -1338,6 +1454,78 @@ export class iDocsignviewerComponent implements OnInit {
             }
         })
         return controls;
+    }
+
+
+    signatureDialogHandler(e, prop) {
+        let that = this;
+
+        // if ($("#" + prop.id).has('img')) {
+        //     var ctx = that.signaturePad.canvas.getContext("2d");
+        //     let image = new Image();
+        //     image.crossOrigin = "Anonymous";
+        //     image.src = $("#" + prop.id).find('img').attr('src');
+        //     image.onload = function () {
+        //         ctx.drawImage(image, image.width, image.height,
+        //             0, 0, that.signaturePad.canvas.width, that.signaturePad.canvas.height);
+        //     }
+        // }
+
+        if (prop.val && !this.IsForceOpenSignDialog) {
+            $('#' + prop.id).contextMenu();
+            return
+        }
+
+        if (prop.type == 'sign' && this.LastSignatureUrl.url && !this.IsForceOpenSignDialog) {
+            this.signUploaded(true, this.LastSignatureUrl, prop);
+            return
+        } else if (prop.type == 'initial' && this.LastInitialUrl.url && !this.IsForceOpenSignDialog) {
+            this.signUploaded(true, this.LastInitialUrl, prop);
+            return
+        }
+        this.IsForceOpenSignDialog = false;
+        $("#signaturepad").dialog({
+            resizable: false,
+            height: 400,
+            width: 'auto',
+            title: (prop.type == 'sign' ? 'Signature Pad' : 'Initial Pad'),
+            modal: true,
+            buttons: [{
+                text: "Create",
+                "class": 'bg-success',
+                click: function () {
+                    that.onSignatureCreate.emit({
+                        controlid: prop.id,
+                        props: prop,
+                        name: that.signaturename,
+                        base64: that.signaturePad.toDataURL()
+                    });
+                    prop.val = that.signaturePad.toDataURL();
+                    //$("#" + prop.id).attr('data-val', true);
+                    //$("#" + prop.id).empty().append('<img style="height: 100%;" src="' + this.signaturePad.toDataURL() + '"/>');
+                    //this.handleInput($("#" + prop.id), prop.type, prop.id, prop, null)
+                }
+            },
+            {
+                text: "Clear",
+                "class": 'cancelButtonClass',
+                click: function () {
+                    that.signaturePad.clear();
+                }
+            },
+            {
+                text: "Cancel",
+                "class": 'cancelButtonClass',
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }],
+            close: function () {
+                that.signaturePad.clear();
+
+            }
+        });
+
     }
 
 }

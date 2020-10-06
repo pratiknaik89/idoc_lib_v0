@@ -37,7 +37,8 @@
               "dist/esigndoccontrol/resources/js/jquery.min.js",
               "dist/esigndoccontrol/resources/js/jquery-ui.min.js",
               "dist/esigndoccontrol/resources/js/jquery.contextMenu.min.js",
-              "dist/esigndoccontrol/resources/js/jquery.ui.position.min.js" 
+              "dist/esigndoccontrol/resources/js/jquery.ui.position.min.js" ,
+              "dist/esigndoccontrol/resources/js/plugins.js" 
             ]
           },
           "configurations": {

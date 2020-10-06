@@ -38,7 +38,11 @@ export interface Dataset {
     require?: boolean;
     value?: string;
     checked?: boolean;
-    tooltip?:string;
+    tooltip?: string;
+    readonly: boolean;
+    dateFormat?: string;
+    lat?:number;
+    lon?:number;
 }
 
 export interface Control {
@@ -49,6 +53,7 @@ export interface Control {
     id: string;
     text?: string;
     val?: string;
+    isviewonly?: boolean;
 }
 
 

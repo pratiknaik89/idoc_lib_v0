@@ -15,9 +15,10 @@ export class LibEditorComponent implements OnInit {
     recipients = [
         "All",
         "Doctor",
-        "Patients"]
+        "t",
+        "c"]
     constructor() { }
-    pdfSrc = "https://bucket-cmp2.s3.us-east-2.amazonaws.com/template/Valparaiso_PermitApp_1600752463.pdf";
+    pdfSrc = "assets/Medical%20Marijuana%20and%20Telemedicine%20Consent%20(Form).pdf";
     ngOnInit(): void {
         setTimeout(() => {
             this.editor.setData(this.pdfSrc,JSON.parse(localStorage.getItem('docdata')));
@@ -34,6 +35,9 @@ export class LibEditorComponent implements OnInit {
     }
 
     getDate() {
+        
+        console.log(this.editor.getAllPropsBinding());
+        console.log(this.editor.validate())
         console.log(this.editor.getData());
     }
 }

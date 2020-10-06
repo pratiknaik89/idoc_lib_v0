@@ -24,7 +24,7 @@ import { CustomDdlComponent } from './controls/customdropdown';
 import { Constants } from './helper/constants';
 //import { version } from 'package.json'
 declare var $: any;
-
+declare var jq_scale_zoom: any;
 @Component({
   selector: 'i-docsigneditor',
   templateUrl: './idocsigneditor.component.html',
@@ -99,7 +99,6 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
   getData() {
-    debugger
     let pages = Object.keys(this.externalProp);
     for (let i = 0; i < pages.length; i++) {
       let d = this.externalProp[pages[i]];
@@ -137,7 +136,7 @@ export class iDocsigneditorComponent implements OnInit {
     { id: 'ddl', 'group': 'Input', type: 'ddl', text: 'Dropdown', 'icon': 'fa-toggle-down', propsallow: ['recipient', 'require', 'name', 'tooltip', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width', 'ddlprop'] },
     { id: 'sign', 'group': 'Sign', type: 'sign', text: 'Signature', 'icon': 'fa-pencil', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top'] },
     { id: 'initial', 'group': 'Sign', type: 'initial', text: 'Initital', 'icon': 'fa-pencil', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top'] },
-    { id: 'signdate', 'group': 'Sign', type: 'signdate', text: 'Signed Date', 'icon': 'fa-calendar', propsallow: ['recipient', 'name', 'tooltip', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top'] },
+    { id: 'signdate', 'group': 'Sign', type: 'signdate', text: 'Signed Date', 'icon': 'fa-calendar', propsallow: ['recipient', 'name', 'tooltip', '', 'dateFormat', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top'] },
     { id: 'checkbox', 'group': 'Input', type: 'checkbox', text: 'Checkbox', 'icon': 'fa-check-square-o', propsallow: ['recipient', 'readonly', 'name', 'tooltip', 'value', 'checked', 'left', 'top'] },
     { id: 'radio', 'group': 'Input', type: 'radio', text: 'Radio', 'icon': 'fa-dot-circle-o', propsallow: ['recipient', 'require', 'name', 'tooltip', 'value', 'checked', 'left', 'top'] },
     { id: 'note', 'group': 'Input', type: 'note', text: 'Note', 'icon': 'fa-sticky-note-o', propsallow: ['recipient', 'require', 'readonly', 'name', 'text', 'tooltip', 'maxlength', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width', 'height'] },
@@ -152,7 +151,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.21';
+    this.version = 'v0.0.25';
     // this message from master
     // this is camera branch
   }
@@ -230,6 +229,58 @@ export class iDocsigneditorComponent implements OnInit {
     console.log(item)
   }
 
+  validate(): boolean {
+    let isbreak = false;
+    let error = '';
+    let ctrlProp: any = {};
+    this.loopEachControl(isbreak, (ctrl, allctr) => {
+      this.removeError(ctrl.id);
+      if (ctrl.type == "ddl") {
+        if (!(ctrl.extras.ddlprop && ctrl.extras.ddlprop.val && ctrl.extras.ddlprop.val.trim() !== "")) {
+          error = 'Please add atleast one item.'
+          ctrlProp = ctrl;
+          isbreak = true;
+        }
+      } else if (ctrl.type == "radio") {
+        for (let i = 0; i < ctrl.dataset.groupids.length; i++) {
+          const id = ctrl.dataset.groupids[i];
+          var ictrl = this.externalProp[ctrl.dataset.page][id];
+          if (ictrl.dataset.value.trim() == '') {
+            error = 'Please set value property.'
+            ctrlProp = ctrl;
+            isbreak = true;
+            break
+          }
+        }
+      }
+    })
+    if (ctrlProp && ctrlProp.id) {
+      this.controlClickHandler($('#' + ctrlProp.id)[0]);
+      this.adderror(ctrlProp, error);
+      return false;
+    }
+    return true
+  }
+
+  adderror(prop, error) {
+    $('#' + prop.id).append('<span title="' + error + '" id="error" style="position: absolute;top: -11px;left: -8px;color: red;font-size: 12px;"><i class="fa fa-warning"></i></span>');
+  }
+  removeError(id) {
+    $('#' + id).find('#error').remove();
+  }
+
+  getAllPropsBinding() {
+    let propbinds = [];
+    this.loopEachControl(false, (ctrl, allpage) => {
+      if (propbinds.indexOf(ctrl.dataset.name) == -1) {
+        propbinds.push(ctrl.dataset.name)
+        console.log('2')
+      }
+    })
+    console.log('1')
+    return propbinds;
+
+  }
 
   ngAfterViewInit(): void {
     //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
@@ -287,6 +338,8 @@ export class iDocsigneditorComponent implements OnInit {
   }
 
 
+
+
   scalereloadComponent(page, SCALE) {
 
 
@@ -304,16 +357,20 @@ export class iDocsigneditorComponent implements OnInit {
 
   pageRendered(e) {
     let that = this;
+    debugger
     console.log(e.pageNumber)
 
     //$(".page[data-page-number='" + e.pageNumber + "']").append('<div class="pdfcontrols" style="width:' + e.source.div.offsetWidth + 'px; height:' + e.source.div.offsetHeight + 'px"><canvas id="cpage' + e.pageNumber + '" width=' + (e.source.div.offsetWidth + 1) + ' height="' + (e.source.div.offsetHeight + 1) + '" style="width:' + (e.source.div.offsetWidth + 1) + 'px; height:' + (e.source.div.offsetHeight + 1) + 'px""></div>')
     this.scale = e.source.scale;
+    jq_scale_zoom = this.scale;
     $(".page[data-page-number='" + e.pageNumber + "']").append('<div class="pdfcontrols"  id="cpage' + e.pageNumber + '" style="width:' + (e.source.div.offsetWidth / this.scale) + 'px; height:' + (e.source.div.offsetHeight / this.scale) + 'px;transform-origin: 0% 0%; transform: scale(' + this.scale + ', ' + this.scale + ')"></div>')
 
     $("#cpage" + e.pageNumber).droppable({
-
+      classes: {
+        "ui-droppable-hover": "ondrpclass"
+      },
       drop: function (event, ui) {
-
+        console.log(e.pageNumber)
         if (!$(ui.draggable).hasClass('newelement')) {
           return
         }
@@ -469,6 +526,7 @@ export class iDocsigneditorComponent implements OnInit {
   totalpagesarr = [];
   totalpages = 0;
   loadComplete(pdf: PDFDocumentProxy): void {
+    debugger
     this.startAutoSave();
     this.totalpages = pdf.numPages;
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -655,7 +713,8 @@ export class iDocsigneditorComponent implements OnInit {
         }
       }
       prop.dataset.require = prop.dataset.require || true;
-      prop.dataset.value = prop.dataset.value || '';
+      prop.dataset.value = prop.dataset.value || id;
+      prop.dataset.val = prop.dataset.checked ? prop.dataset.value : undefined;
       control = new Radio(prop, style);
     }
     else if (type == 'attach') {
@@ -913,6 +972,7 @@ export class iDocsigneditorComponent implements OnInit {
         }
       }
     }
+    this.externalProp = {};
 
   }
 
@@ -1188,90 +1248,102 @@ export class iDocsigneditorComponent implements OnInit {
     this.zone.detectChanges();
   }
 
-  updateProperties() {
-    debugger
+  updateProperties(item) {
+
+
+
     let selCtrl = $('#' + this.selectedProps.id)[0];
-
     var extprop = this.getExternalProp(this.selectedProps.dataset.page, this.selectedProps.id);
-    for (let i = 0; i < this.selectedField['prop'].length; i++) {
-      const element = this.selectedField['prop'][i];
-      if (element.key == 'text') {
-
-        $('#' + this.selectedProps.id).find('span').text(element.value);
-        this.selectedProps.dataset[element.key] = element.value;
-        extprop[element.key] = element.value;
-      } if (element.key == 'label') {
-
-        $(`#${this.selectedProps.id}`).find('.label').text(element.value)
-      } else if (element.propdata == 'dataset') {
-
-        if ((this.selectedProps.dataset.type == 'radio' || this.selectedProps.dataset.type == 'checkbox')) {
-          if (element.key == 'name') {
-            $(`#cpage${this.selectedProps.dataset.page}`).find(`[data-group="${this.selectedProps.dataset.group}"]`).attr('data-name', element.value)
-            extprop.dataset[element.key] = element.value;
-            this.selectedProps.dataset[element.key] = element.value;
 
 
+
+    // for (let i = 0; i < this.selectedField['prop'].length; i++) {
+    const element = item;//this.selectedField['prop'][i];
+    if (element.key == 'text') {
+      $('#' + this.selectedProps.id).find('span').text(element.value);
+      this.selectedProps.dataset[element.key] = element.value;
+      extprop[element.key] = element.value;
+      extprop['val'] = element.value
+    }
+    if (element.key == 'label') {
+      $(`#${this.selectedProps.id}`).find('.label').text(element.value)
+    } else if (element.propdata == 'dataset') {
+      if ((this.selectedProps.dataset.type == 'radio' || this.selectedProps.dataset.type == 'checkbox')) {
+        if (element.key == 'name') {
+          $(`#cpage${this.selectedProps.dataset.page}`).find(`[data-group="${this.selectedProps.dataset.group}"]`).attr('data-name', element.value)
+          extprop.dataset[element.key] = element.value;
+          this.selectedProps.dataset[element.key] = element.value;
+
+
+          let items = this.externalProp[this.selectedProps.dataset.page][this.selectedProps.dataset.group].dataset['groupids']
+
+          for (let i = 0; i < items.length; i++) {
+            const ids = items[i];
+            this.externalProp[this.selectedProps.dataset.page][ids].dataset['name'] = this.selectedProps.dataset.name;
+
+          }
+
+        } else if (element.key == 'checked') {
+          if (this.selectedProps.dataset.type == 'radio') {
+            $(`#cpage${this.selectedProps.dataset.page}`).find(`[data-group="${this.selectedProps.dataset.group}"]`).attr('data-checked', 'false');
             let items = this.externalProp[this.selectedProps.dataset.page][this.selectedProps.dataset.group].dataset['groupids']
 
             for (let i = 0; i < items.length; i++) {
               const ids = items[i];
-              this.externalProp[this.selectedProps.dataset.page][ids].dataset['name'] = this.selectedProps.dataset.name;
+              this.externalProp[this.selectedProps.dataset.page][ids].dataset['checked'] = false;
+              this.externalProp[this.selectedProps.dataset.page][ids].val =  this.externalProp[this.selectedProps.dataset.page][this.selectedProps.id].dataset['value'];
 
             }
+          }
 
-          } else if (element.key == 'checked') {
-            if (this.selectedProps.dataset.type == 'radio') {
-              $(`#cpage${this.selectedProps.dataset.page}`).find(`[data-group="${this.selectedProps.dataset.group}"]`).attr('data-checked', 'false');
-              let items = this.externalProp[this.selectedProps.dataset.page][this.selectedProps.dataset.group].dataset['groupids']
-
-              for (let i = 0; i < items.length; i++) {
-                const ids = items[i];
-                this.externalProp[this.selectedProps.dataset.page][ids].dataset['checked'] = false;
-
-              }
-            }
-
-            if (element.value == true) {
-              $('#' + this.selectedProps.id).find('input').prop('checked', true);
-            } else {
-              $('#' + this.selectedProps.id).find('input').prop('checked', false);
-            }
-
-            extprop.dataset[element.key] = element.value;
-            selCtrl.dataset[element.key] = element.value;
+          if (element.value == true) {
+            $('#' + this.selectedProps.id).find('input').prop('checked', true);
           } else {
-            selCtrl.dataset[element.key] = element.value;
-            extprop.dataset[element.key] = element.value;
+            $('#' + this.selectedProps.id).find('input').prop('checked', false);
+          }
+
+          extprop.dataset[element.key] = element.value;
+          selCtrl.dataset[element.key] = element.value;
+        } else if (this.selectedProps.dataset.type == 'radio' && element.key == 'value' && this.selectedProps.dataset.checked) {
+          let items = this.externalProp[this.selectedProps.dataset.page][this.selectedProps.dataset.group].dataset['groupids']
+          for (let i = 0; i < items.length; i++) {
+            const ids = items[i];
+            this.externalProp[this.selectedProps.dataset.page][ids].val = element.value;
           }
 
         } else {
           selCtrl.dataset[element.key] = element.value;
           extprop.dataset[element.key] = element.value;
         }
-      } else if (element.propdata == 'style') {
-        selCtrl.style[element.key] = element.value + element.append;
-        extprop.style[element.key] = element.value;
-      } else if (element.propdata == 'prop') {
-        selCtrl[element.key] = element.value;
-        extprop[element.key] = element.value;
+
       }
-
-      // if (this.selectedField['ctype'] == 'ddl' || this.selectedField['ctype'] == 'note' || this.selectedField['ctype'] == 'text') {
-      //     let text = this.selectedObject.item(0);
-
-      //     if (['text', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight'].indexOf(element.key) > -1) {
-      //         text.set(element.key, element.value)
-      //     } else {
-      //         this.selectedObject[element.key] = (element.type === 'number' ? parseInt(element.value) : element.value);
-
-      //     }
-
-
-      // } else {
-      //     this.selectedObject[element.key] = (element.type === 'number' ? parseInt(element.value) : element.value);
-      // }
+      else {
+        selCtrl.dataset[element.key] = element.value;
+        extprop.dataset[element.key] = element.value;
+      }
+    } else if (element.propdata == 'style') {
+      selCtrl.style[element.key] = element.value + element.append;
+      extprop.style[element.key] = element.value;
+    } else if (element.propdata == 'prop') {
+      selCtrl[element.key] = element.value;
+      extprop[element.key] = element.value;
     }
+
+    // if (this.selectedField['ctype'] == 'ddl' || this.selectedField['ctype'] == 'note' || this.selectedField['ctype'] == 'text') {
+    //     let text = this.selectedObject.item(0);
+
+    //     if (['text', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight'].indexOf(element.key) > -1) {
+    //         text.set(element.key, element.value)
+    //     } else {
+    //         this.selectedObject[element.key] = (element.type === 'number' ? parseInt(element.value) : element.value);
+
+    //     }
+
+
+    // } else {
+    //     this.selectedObject[element.key] = (element.type === 'number' ? parseInt(element.value) : element.value);
+    // }
+    // }
     this.setExternalProp(this.selectedProps.dataset.page, this.selectedProps.id, extprop);
     //console.log(this.selectedObject);
     // this.selectedObject.canvas.renderAll();
@@ -1394,6 +1466,28 @@ export class iDocsigneditorComponent implements OnInit {
     return colorNum * (360 / colors) % 360;
   }
 
+  loopEachControl(isbreak, callback) {
+    let pages = Object.keys(this.externalProp);
+    for (let i = 0; i < pages.length; i++) {
+      if (isbreak) break;
+      if (!this.externalProp[pages[i]] || this.externalProp[pages[i]] == null) continue;
+      let ele = Object.keys(this.externalProp[pages[i]])
+      let lastprop = this.externalProp[pages[i]];
+      for (let j = 0; j < ele.length; j++) {
+        const propele = lastprop[ele[j]];
+        if (isbreak) break;
+        if (propele.type == "radio" || propele.type == "checkbox") {
+          if (propele.dataset.groupids) {
+            callback(propele, lastprop);
+            continue
+          } else {
+            continue
+          }
+        }
+        callback(propele, lastprop);
+      }
+    }
+  }
 
 }
 

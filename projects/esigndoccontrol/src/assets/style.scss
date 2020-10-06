@@ -613,4 +613,44 @@ i-docsigneditor, i-docsignviewer {
         -moz-animation: none;
         background-image: none;
       }
+
+      .rec_item_holder{ 
+        
+        display: flex;
+        flex-wrap: wrap;
+        max-height: 105px;
+        overflow: auto;
+      }
+
+      .rec_item_holder .rec_items{
+        flex: 0 50%;
+        /*demo*/ 
+        box-sizing:border-box;
+        cursor: pointer;
+        overflow: hidden;
+        
+      }
+      .rec_item_holder .rec_items .icon i{
+        font-size: 25px;
+        color: #9c9c9c;
+      }
+      .rec_item_holder .rec_items .name{
+        width: 100%;
+        overflow: hidden;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 11px;
+      }
+      .ondrpclass{
+        background-color: #0000000f;
+      }
+      .rec_item_holder .rec_items.acts .name{
+        color: #000;
+        font-weight: bold;
+        
+      }
+      .rec_item_holder .rec_items.acts i{
+        color: #000;
+      }
 }

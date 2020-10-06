@@ -47,7 +47,6 @@ const noop = () => {
         background: rgba(255, 0, 0, 0.6);
         height: 13px;
         width: 13px;
-        border-radius: 50%;
         position: absolute;
         left: 7px;
 

@@ -76,12 +76,24 @@
 <div class="content-document">
 
     <div class="leftbar" [style.height]="'calc(100vh - ' + reduceHeight +'px)'">
-        <div class="barTitle">
-            <h4 [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">Fields</h4>
-            <app-ddl [items]="recipients" [(selectdItem)]="selectedRecipient.name"
+        <div class="barTitle" style="padding: 0;">
+            <h4 style="margin: 0px; padding: 10px; font-size: 14px;" [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">Fields</h4>
+            <!-- <app-ddl [items]="recipients" [(selectdItem)]="selectedRecipient.name"
                 (onChanged)="onReccipientChange($event)">
 
-            </app-ddl>
+            </app-ddl> -->
+            <div class="rec_item_holder">
+                <div class="rec_items" *ngFor="let item of recipients" [ngClass]="{'acts': item.name === selectedRecipient.name}">
+                    <div (click)="onReccipientChange(item)" style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;flex-direction: column;padding: 2px;" style.background="{{item.color}}">
+                        <div class="icon">
+                            <i class="fa fa-user-circle"></i>
+                        </div>
+                        <span class="name" title="{{item.name}}">
+                            {{item.name}}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- <button (click)="export()">Export</button> -->
@@ -183,7 +195,7 @@
 
 <ng-template #ddl let-item='item'>
     <span class="label ">{{item.display}}</span>
-    <select class="control select" style="flex: 1;" (change)="updateProperties()" [(ngModel)]="item.value">
+    <select class="control select" style="flex: 1;" (change)="updateProperties(item)" [(ngModel)]="item.value">
 
         <option *ngFor="let it of propBehaviour[item.key]['values']" value="{{it}}">
             {{it}}
@@ -197,13 +209,13 @@
     justify-content: center;
     align-items: center;">
         <span class="label" style="margin-right: 4px;flex: 1;">{{item.display}}</span>
-        <input class="control number" type="number" (change)="updateProperties()" style="" [(ngModel)]="item.value">
+        <input class="control number" type="number" (change)="updateProperties(item)" style="" [(ngModel)]="item.value">
     </div>
 </ng-template>
 
 <ng-template #checkbox let-item='item'>
     <div style="display: flex;align-items: center;">
-        <input class="checkbox" style="display: inline-block;" (change)="updateProperties()" type="checkbox"
+        <input class="checkbox" style="display: inline-block;" (change)="updateProperties(item)" type="checkbox"
             [(ngModel)]="item.value">
         <span class="label " style="display: inline;">{{item.display}}</span>
     </div>
@@ -211,7 +223,7 @@
 
 <ng-template #text let-item='item'>
     <span class="label ">{{item.display}}</span>
-    <input class="control" type="text" (change)="updateProperties()" style="flex: 1;" [(ngModel)]="item.value">
+    <input class="control" type="text" (change)="updateProperties(item)" style="flex: 1;" [(ngModel)]="item.value">
 </ng-template>
 
 
