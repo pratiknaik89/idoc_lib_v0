@@ -268,11 +268,11 @@ export class iDocsignviewerComponent implements OnInit {
                 ctrlVal = ctrlReadValue;
                 control.isviewonly = true;
             }
+            
 
             if (ctrlReadValue || ctrlVal) {
                 if (control.type == "radio") {
-
-                    var value = ctrlVal && ctrlVal.value;
+                    var value = ctrlVal.val;
                     for (let i = 0; i < control.dataset.groupids.length; i++) {
                         const id = control.dataset.groupids[i];
                         var ctrl: Control = controls[id];
@@ -282,25 +282,28 @@ export class iDocsignviewerComponent implements OnInit {
                             ctrl.dataset.checked = true;
                         }
                         control.val = value;
-
                     }
                 } else if (control.type == "checkbox") {
-                    var value = ctrlVal && ctrlVal.value;
-                    for (let i = 0; i < control.dataset.groupids.length; i++) {
-                        const id = control.dataset.groupids[i];
-                        var ctrl: Control = controls[id];
-                        ctrl.isviewonly = control.isviewonly;
-                        control.val = ctrl.dataset.checked ? '1' : '0';
+                    if(ctrlVal.val){
+                        control.dataset.checked = true;    
                     }
+                    control.val = ctrlVal.val;
+                    
+                    // for (let i = 0; i < control.dataset.groupids.length; i++) {
+                    //     const id = control.dataset.groupids[i];
+                    //     var ctrl: Control = controls[id];
+                    //     ctrl.isviewonly = control.isviewonly;
+                    //     control.val = (ctrl.dataset.checked ? true : false);
+                    // }
                 } else if (control.type == "ddl") {
-                    var value = ctrlVal && ctrlVal.value;
+                    var value = ctrlVal.val;
                     if (!(control.val && control.val !== "")) {
                         if (control.extras.ddlprop && control.extras.ddlprop.defval && control.extras.ddlprop.defval != "") {
-                            control.val = control.extras.ddlprop.defval
+                            control.val = value || control.extras.ddlprop.defval
                         }
                     }
                 } else {
-                    var value = ctrlVal && ctrlVal.value;
+                    var value = ctrlVal.val;
                     control.val = value;
                 }
 
@@ -359,7 +362,7 @@ export class iDocsignviewerComponent implements OnInit {
             for (let i = 0; i < controls.length; i++) {
                 debugger
                 const ctrl: Control = controls[i];
-                if(ctrl.extras.recipient.val == control.extras.recipient.val && ctrl.val){
+                if (ctrl.extras.recipient.val == control.extras.recipient.val && ctrl.val) {
                     this.signatureToggle(item.url, ctrl.id)
                     ctrl.val = item.url;
                 }

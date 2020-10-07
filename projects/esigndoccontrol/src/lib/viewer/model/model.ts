@@ -52,7 +52,7 @@ export interface Control {
     type: controlType;
     id: string;
     text?: string;
-    val?: string;
+    val?: any;
     isviewonly?: boolean;
 }
 
