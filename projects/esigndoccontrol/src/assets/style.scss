@@ -383,7 +383,7 @@ i-docsigneditor, i-docsignviewer {
       #loader{
         position: absolute;
       height: 100%;
-
+font-size: 12px;
       width: 100%;
       z-index: 111;
       background: #fff;display: flex;align-items: center;justify-content: center;flex-direction: column;
@@ -474,10 +474,10 @@ i-docsigneditor, i-docsignviewer {
 
 
       .meter {
-        height: 10px;  /* Can be anything */
+        height: 2px;  /* Can be anything */
         position: relative;
         margin: 2px 0 4px 0; /* Just for demo spacing */
-        background: #555;
+        /*background: #555;*/
         -moz-border-radius: 25px;
         -webkit-border-radius: 25px;
         border-radius: 25px;
