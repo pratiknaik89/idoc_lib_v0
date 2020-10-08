@@ -167,7 +167,8 @@
             </div>
         </my-tab> -->
         <my-tab [tabTitle]="'Draw'" [active]="true">
-            <input class="form-control" [(ngModel)]="signaturename" style="border: 1px solid #ccc;
+            <input class="form-control" (blur)="signatureSuggestion($event)" 
+            [(ngModel)]="signaturename" style="border: 1px solid #ccc;
             padding: 6px;
             margin-bottom: 10px;
             width: 97%;

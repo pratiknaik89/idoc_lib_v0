@@ -65,10 +65,11 @@ export class iDocsignviewerComponent implements OnInit {
     selSign: ISign;
     progress = 0;
     version = '';
+    selectedProps: Control;
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-        this.version = 'v0.0.25';
+        this.version = 'v0.0.26';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
@@ -115,8 +116,8 @@ export class iDocsignviewerComponent implements OnInit {
 
     //Signature Name
     public setSignatureName(sign_name: string, initial_name: string) {
-        this.signName = sign_name;
-        this.initialName = initial_name;
+        this.signName = sign_name.toString();
+        this.initialName = initial_name.toString();
     }
 
     public getSignatureName() {
@@ -268,7 +269,7 @@ export class iDocsignviewerComponent implements OnInit {
                 ctrlVal = ctrlReadValue;
                 control.isviewonly = true;
             }
-            
+
 
             if (ctrlReadValue || ctrlVal) {
                 if (control.type == "radio") {
@@ -284,11 +285,11 @@ export class iDocsignviewerComponent implements OnInit {
                         control.val = value;
                     }
                 } else if (control.type == "checkbox") {
-                    if(ctrlVal.val){
-                        control.dataset.checked = true;    
+                    if (ctrlVal.val) {
+                        control.dataset.checked = true;
                     }
                     control.val = ctrlVal.val;
-                    
+
                     // for (let i = 0; i < control.dataset.groupids.length; i++) {
                     //     const id = control.dataset.groupids[i];
                     //     var ctrl: Control = controls[id];
@@ -1301,7 +1302,7 @@ export class iDocsignviewerComponent implements OnInit {
         ctx.font = "60px " + item.name;
         ctx.textAlign = "center";
         ctx.fillText(this.signaturename, 175, 90);
-
+        this.signaturePad._isEmpty = false;
     }
 
 
@@ -1464,6 +1465,7 @@ export class iDocsignviewerComponent implements OnInit {
 
 
     signatureDialogHandler(e, prop) {
+        this.selectedProps = prop;
         let that = this;
 
         // if ($("#" + prop.id).has('img')) {
@@ -1482,13 +1484,21 @@ export class iDocsignviewerComponent implements OnInit {
             return
         }
 
-        if (prop.type == 'sign' && this.LastSignatureUrl.url && !this.IsForceOpenSignDialog) {
+        if (prop.type == controlType.sign && this.LastSignatureUrl.url && !this.IsForceOpenSignDialog) {
             this.signUploaded(true, this.LastSignatureUrl, prop);
             return
-        } else if (prop.type == 'initial' && this.LastInitialUrl.url && !this.IsForceOpenSignDialog) {
+        } else if (prop.type == controlType.initial && this.LastInitialUrl.url && !this.IsForceOpenSignDialog) {
             this.signUploaded(true, this.LastInitialUrl, prop);
             return
         }
+
+        if(prop.type == controlType.sign){
+            this.signaturename = this.signName.toString()
+        }else if(prop.type == controlType.initial){
+            this.signaturename = this.initialName.toString()
+        }
+
+
         this.IsForceOpenSignDialog = false;
         $("#signaturepad").dialog({
             resizable: false,
@@ -1500,13 +1510,15 @@ export class iDocsignviewerComponent implements OnInit {
                 text: "Create",
                 "class": 'bg-success',
                 click: function () {
-                    that.onSignatureCreate.emit({
-                        controlid: prop.id,
-                        props: prop,
-                        name: that.signaturename,
-                        base64: that.signaturePad.toDataURL()
-                    });
-                    prop.val = that.signaturePad.toDataURL();
+                    if (!that.signaturePad.isEmpty()) {
+                        that.onSignatureCreate.emit({
+                            controlid: prop.id,
+                            props: prop,
+                            name: that.signaturename,
+                            base64: that.signaturePad.toDataURL()
+                        });
+                        prop.val = that.signaturePad.toDataURL();
+                    }
                     //$("#" + prop.id).attr('data-val', true);
                     //$("#" + prop.id).empty().append('<img style="height: 100%;" src="' + this.signaturePad.toDataURL() + '"/>');
                     //this.handleInput($("#" + prop.id), prop.type, prop.id, prop, null)
@@ -1531,6 +1543,15 @@ export class iDocsignviewerComponent implements OnInit {
 
             }
         });
+
+    }
+
+    signatureSuggestion(e) {
+        if (this.selectedProps.type == controlType.sign) {
+            this.signName = this.signaturename.toString();
+        } else if (this.selectedProps.type == controlType.initial) {
+            this.initialName = this.signaturename.toString();
+        }
 
     }
 

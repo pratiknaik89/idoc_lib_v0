@@ -55,10 +55,6 @@ export class LibViwerComponent implements OnInit {
             }])
             //this.viewer.setVisibility('all', true , true)    
 
-
-
-
-
         }, 100);
 
     }
