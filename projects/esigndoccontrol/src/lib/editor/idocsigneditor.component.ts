@@ -380,7 +380,7 @@ export class iDocsigneditorComponent implements OnInit {
           left: Math.ceil((ui.offset.left - $(this).offset().left) / that.scale),
           top: Math.ceil((ui.offset.top - $(this).offset().top) / that.scale)
         }
-
+debugger
         let id = that.addControlsHtml({}, e.pageNumber, position, type);
         if (type == 'radio') {
           position.top += 20
@@ -688,7 +688,7 @@ export class iDocsigneditorComponent implements OnInit {
         prop.dataset.name = id;
         prop.dataset.groupids = [id];
       } else {
-        prop.dataset.name = el.name || group;
+        prop.dataset.name = prop.dataset.name || el.name || group;
         if (this.externalProp[page][group].dataset['groupids'].indexOf(id) == -1) {
           this.externalProp[page][group].dataset['groupids'].push(id);
         }
@@ -707,7 +707,7 @@ export class iDocsigneditorComponent implements OnInit {
         prop.dataset.name = id;
         prop.dataset.groupids = [id];
       } else {
-        prop.dataset.name = el.name || group;
+        prop.dataset.name = prop.dataset.name || el.name || group;
         if (this.externalProp[page][group].dataset['groupids'].indexOf(id) == -1) {
           this.externalProp[page][group].dataset['groupids'].push(id);
         }
