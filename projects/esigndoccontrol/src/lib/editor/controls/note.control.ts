@@ -15,7 +15,7 @@ export class Note extends BaseControl {
         }
   
         props.style = { ...props.style, ...style };
-        props.text = props.text || 'Note';
+        props.text = props.text || '';
         props.dataset.require = props.dataset.require || true;
         props.dataset.maxlength = props.dataset.maxlength || 4000;
     }
@@ -27,7 +27,7 @@ export class Note extends BaseControl {
     }
 
     private generateTemplate(prop) {
-      const design = '<div data-readonly="' + prop.dataset.readonly + '" data-require="' + prop.dataset.require + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp qtip tip-top" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><span>' + prop.text + '</span></div>';
+      const design = '<div data-readonly="' + prop.dataset.readonly + '" data-require="' + prop.dataset.require + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp qtip tip-top" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px"><span>' + (prop.text || prop.dataset.placeholder || '') + '</span></div>';
       const resize = {
         minWidth: 80,
         minHeight: 15,

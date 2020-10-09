@@ -41,8 +41,9 @@ export interface Dataset {
     tooltip?: string;
     readonly: boolean;
     dateFormat?: string;
-    lat?:number;
-    lon?:number;
+    lat?: number;
+    lon?: number;
+    placeholder?: string;
 }
 
 export interface Control {

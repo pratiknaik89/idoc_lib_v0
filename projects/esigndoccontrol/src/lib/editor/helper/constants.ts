@@ -196,6 +196,14 @@ export class Constants {
             'append': '',
             'default': '1000',
             'group': 'Data'
+        }, 'placeholder': {
+            'display': 'Placeholder',
+            'dtype': 'dataset',
+            'type': 'text',
+            'cast': 'string',
+            'append': '',
+            'default': '',
+            'group': ''
         }
     }
 

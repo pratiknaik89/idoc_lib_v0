@@ -132,14 +132,14 @@ export class iDocsigneditorComponent implements OnInit {
 
 
   controls = [
-    { id: 'text', 'group': 'Input', type: 'text', text: 'TextBox', 'icon': 'fa-font', propsallow: ['recipient', 'require', 'readonly', 'name', 'text', 'tooltip', 'fieldtype', 'maxlength', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width'] },
+    { id: 'text', 'group': 'Input', type: 'text', text: 'TextBox', 'icon': 'fa-font', propsallow: ['recipient', 'require', 'readonly', 'name', 'placeholder', 'text', 'tooltip', 'fieldtype', 'maxlength', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width'] },
     { id: 'ddl', 'group': 'Input', type: 'ddl', text: 'Dropdown', 'icon': 'fa-toggle-down', propsallow: ['recipient', 'require', 'name', 'tooltip', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width', 'ddlprop'] },
     { id: 'sign', 'group': 'Sign', type: 'sign', text: 'Signature', 'icon': 'fa-pencil', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top'] },
     { id: 'initial', 'group': 'Sign', type: 'initial', text: 'Initital', 'icon': 'fa-pencil', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top'] },
     { id: 'signdate', 'group': 'Sign', type: 'signdate', text: 'Signed Date', 'icon': 'fa-calendar', propsallow: ['recipient', 'name', 'tooltip', '', 'dateFormat', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top'] },
     { id: 'checkbox', 'group': 'Input', type: 'checkbox', text: 'Checkbox', 'icon': 'fa-check-square-o', propsallow: ['recipient', 'readonly', 'name', 'tooltip', 'value', 'checked', 'left', 'top'] },
     { id: 'radio', 'group': 'Input', type: 'radio', text: 'Radio', 'icon': 'fa-dot-circle-o', propsallow: ['recipient', 'require', 'name', 'tooltip', 'value', 'checked', 'left', 'top'] },
-    { id: 'note', 'group': 'Input', type: 'note', text: 'Note', 'icon': 'fa-sticky-note-o', propsallow: ['recipient', 'require', 'readonly', 'name', 'text', 'tooltip', 'maxlength', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width', 'height'] },
+    { id: 'note', 'group': 'Input', type: 'note', text: 'Note', 'icon': 'fa-sticky-note-o', propsallow: ['recipient', 'require', 'readonly', 'name', 'placeholder', 'text', 'tooltip', 'maxlength', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'left', 'top', 'width', 'height'] },
     { id: 'attach', 'group': 'Advanced', type: 'attach', text: 'Attachment', 'icon': 'fa-paperclip', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top'], isPro: true },
     { id: 'pic', 'group': 'Advanced', type: 'pic', text: 'Picture', 'icon': 'fa-camera-retro', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top', 'width', 'height'], isPro: true },
     { id: 'loc', 'group': 'Advanced', type: 'loc', text: 'Location', 'icon': 'fa-map-marker', propsallow: ['recipient', 'require', 'name', 'tooltip', 'left', 'top', 'width', 'height'], isPro: true }
@@ -380,7 +380,7 @@ export class iDocsigneditorComponent implements OnInit {
           left: Math.ceil((ui.offset.left - $(this).offset().left) / that.scale),
           top: Math.ceil((ui.offset.top - $(this).offset().top) / that.scale)
         }
-debugger
+        debugger
         let id = that.addControlsHtml({}, e.pageNumber, position, type);
         if (type == 'radio') {
           position.top += 20
@@ -1259,11 +1259,15 @@ debugger
 
     // for (let i = 0; i < this.selectedField['prop'].length; i++) {
     const element = item;//this.selectedField['prop'][i];
-    if (element.key == 'text') {
-      $('#' + this.selectedProps.id).find('span').text(element.value);
+    if (element.key == 'text' || element.key == 'placeholder') {
       this.selectedProps.dataset[element.key] = element.value;
-      extprop[element.key] = element.value;
-      extprop['val'] = element.value
+      if (element.key == 'text') {
+        extprop[element.key] = element.value;
+        extprop['val'] = element.value
+      } else if (element.key == 'placeholder') {
+        extprop.dataset[element.key] = element.value;
+      }
+      $('#' + this.selectedProps.id).find('span').text((element.value || extprop.dataset.placeholder || extprop.text || ''));
     }
     if (element.key == 'label') {
       $(`#${this.selectedProps.id}`).find('.label').text(element.value)
@@ -1291,7 +1295,7 @@ debugger
             for (let i = 0; i < items.length; i++) {
               const ids = items[i];
               this.externalProp[this.selectedProps.dataset.page][ids].dataset['checked'] = false;
-              this.externalProp[this.selectedProps.dataset.page][ids].val =  this.externalProp[this.selectedProps.dataset.page][this.selectedProps.id].dataset['value'];
+              this.externalProp[this.selectedProps.dataset.page][ids].val = this.externalProp[this.selectedProps.dataset.page][this.selectedProps.id].dataset['value'];
 
             }
           }

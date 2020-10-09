@@ -1058,7 +1058,7 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     createTextBox(prop: Control) {
-        const design = '<input data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
+        const design = '<input data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="'+ (prop.dataset.placeholder || '') +'" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
 
 
         // view only code
@@ -1159,7 +1159,7 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     createNoteComp(prop: Control) {
-        const design = '<textarea data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;resize: none;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</textarea>';
+        const design = '<textarea data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="'+ (prop.dataset.placeholder || '') +'" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;resize: none;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</textarea>';
 
         // view only code
 
