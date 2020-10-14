@@ -48,6 +48,7 @@ export class iDocsigneditorComponent implements OnInit {
   //toolbar and heading
   @Input() toolbarBg = '#e9e9e9';
   @Input() toolbarColor = '#333333';
+  @Input() v2 = false;
 
   //offline data savinf
   @Input() offlineSaving: boolean = true;
@@ -57,6 +58,16 @@ export class iDocsigneditorComponent implements OnInit {
 
   //reduce height from 100vh
   @Input() reduceHeight = 0;
+  @Input() recipientColors = [
+    '0,90%,54%',
+    '35,90%,54%',
+    '57,90%,54%',
+    '73,90%,54%',
+    '93,90%,54%',
+    '231,90%,54%',
+    '287,90%,54%',
+    '311,90%,54%'
+  ];
   @Input('options') options = {
     fonts: ['Arial', 'Helvetica', 'Calibri']
   }
@@ -71,18 +82,27 @@ export class iDocsigneditorComponent implements OnInit {
   @Output() onObjectAdded: EventEmitter<any> = new EventEmitter();
   @Output() onObjectRemoved: EventEmitter<any> = new EventEmitter();
   @Output() onLoadCompleted: EventEmitter<any> = new EventEmitter();
-
+  lasterror = ''
   controlSet = {};
   selectedRecipient = {
     name: '',
     color: '#ffd65b'
   };
   progress = 10;
+  iscontrolcliked = false;
 
   setRecipients(rec_array) {
+
     this.recipients = [];
+
     for (let i = 0; i < rec_array.length; i++) {
-      var color = "hsl( " + this.makeColor(i, rec_array.length) + ", 100%, 50%, 0.4)";
+
+      var color = '';
+      if (this.recipientColors && this.recipientColors.length >= rec_array.length && this.v2) {
+        color = "hsl( " + this.recipientColors[i] + ", 0.74)";;
+      } else {
+        color = "hsl( " + this.makeColor(i, rec_array.length) + ", 100%, 50%, 0.4)";
+      }
       const key = rec_array[i];
       this.recipients.push({
         name: key,
@@ -151,7 +171,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.28';
+    this.version = 'v0.0.30';
     // this message from master
     // this is camera branch
   }
@@ -252,21 +272,48 @@ export class iDocsigneditorComponent implements OnInit {
             break
           }
         }
+      } else if (!this.recipients.find(a => { return a.name === ctrl.extras['recipient'].val })) {
+        error = 'Invalid Recipient.'
+        ctrlProp = ctrl;
+        isbreak = true;
       }
     })
     if (ctrlProp && ctrlProp.id) {
-      this.controlClickHandler($('#' + ctrlProp.id)[0]);
-      this.adderror(ctrlProp, error);
+      this.page = ctrlProp.dataset.page;
+      let that = this;
+      //  $('#' + ctrlProp.id).waitUntilExists(function () {
+      const t = setInterval(() => {
+        if ($('#' + ctrlProp.id)) {
+          clearInterval(t);
+          that.adderror(ctrlProp, error);
+          that.controlClickHandler($('#' + ctrlProp.id)[0]);
+          that.gotoControl(that.page, ctrlProp);
+
+        }
+      }, 500)
+
+      //});
       return false;
     }
     return true
   }
 
   adderror(prop, error) {
+
+    this.lasterror = error;
     $('#' + prop.id).append('<span title="' + error + '" id="error" style="position: absolute;top: -11px;left: -8px;color: red;font-size: 12px;"><i class="fa fa-warning"></i></span>');
   }
   removeError(id) {
+    this.lasterror = '';
     $('#' + id).find('#error').remove();
+  }
+
+  gotoControl(page, ctrl) {
+    var x = $('div[data-page-number="' + page + '"]')[0];
+    $('.ng2-pdf-viewer-container').animate({
+      scrollTop: ((parseInt($('#' + ctrl.id)[0].offsetTop) * this.scale) + x.offsetTop - 100) + 'px'
+    }, 800, function () {
+    });
   }
 
   getAllPropsBinding() {
@@ -288,8 +335,8 @@ export class iDocsigneditorComponent implements OnInit {
     $(".draggable").draggable({
       cursorAt: { top: 0, left: 0 },
       helper: function (event) {
-
-        return $("<div class='helper'>" + $(this).html() + "</div>");
+        let backgrd = 'style="background-color:' + that.selectedRecipient.color + '!important"'
+        return $("<div class='helper' " + backgrd + ">" + $(this).html() + "</div>");
       },
       revert: "invalid",
       cursor: "move",
@@ -302,36 +349,54 @@ export class iDocsigneditorComponent implements OnInit {
     let that = this;
     // $(function () {
 
-    //     $(document).bind('keydown', function (e) {
-    //         if (that.selectedControl && $(that.selectedControl).is(":focus")) {
-    //             e.preventDefault();
-    //             if (e.keyCode == 37) // right -- 
-    //             {
-    //                 that.selectedField['postion']['left']['value'] -= 1;
-    //                 //that.selectedControl.style['left'] = (parseFloat(that.selectedControl.style['left']) + 1) + 'px'
-    //             } else if (e.keyCode == 39) //left
-    //             {
-    //                 that.selectedField['postion']['left']['value'] += 1;
-    //                 //that.selectedControl.style['left'] = (parseFloat(that.selectedControl.style['left']) - 1) + 'px'
-    //             }
-    //             else if (e.keyCode == 40) // key down
-    //             {
-    //                 that.selectedField['postion']['top']['value'] += 1;
-    //                 //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) - 1) + 'px'
-    //             } else if (e.keyCode == 38) //Key up
-    //             {
-    //                 that.selectedField['postion']['top']['value'] -= 1;
-    //                 //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) + 1) + 'px'
-    //             } else if (e.keyCode == 8 || e.keyCode == 46) //Key up
-    //             {
-    //                 that.removeControl();
-    //                 //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) + 1) + 'px'
-    //             }
+    $(document).bind('keydown', function (e) {
+      // console.log(e.keyCode)
+      if (e.keyCode == 91 || e.keyCode == 17) {
+        that.iscontrolcliked = true;
+      } else if (that.selectedControl) {
+        e.preventDefault();
+        if (e.keyCode == 37 || e.keyCode == 39) // right  | left
+        {
+          let itm = that.selectedField['prop'].find(a => {
+            return a.key === 'left'
+          })
+          if (e.keyCode == 39) {
+            itm.value += 1;
+          } else {
+            itm.value -= 1;
+          }
+          that.updateProperties(itm)
 
-    //             that.updateProperties()
-    //             return false;
-    //         }
-    //     })
+          //that.selectedControl.style['left'] = (parseFloat(that.selectedControl.style['left']) + 1) + 'px'
+        }
+        else if (e.keyCode == 40 || e.keyCode == 38) // key down | up
+        {
+          let itm = that.selectedField['prop'].find(a => {
+            return a.key === 'top'
+          })
+          if (e.keyCode == 38) {
+            itm.value -= 1;
+          } else {
+            itm.value += 1;
+          }
+          that.updateProperties(itm)
+          //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) - 1) + 'px'
+        } else if (e.keyCode == 8 || e.keyCode == 46) //Key up
+        {
+          that.removeControl();
+          //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) + 1) + 'px'
+        }
+      }
+      return
+    })
+
+    $(document).bind('keyup', function (e) {
+
+      if (e.keyCode == 91 || e.keyCode == 17) {
+        that.iscontrolcliked = false;
+      }
+
+    });
     // });
 
 
@@ -354,10 +419,16 @@ export class iDocsigneditorComponent implements OnInit {
     //     }
     // }
   }
+  mainContext = {
+    canDelete: false,
+    canPaste: false,
+
+  }
+
 
   pageRendered(e) {
     let that = this;
-    debugger
+
     console.log(e.pageNumber)
 
     //$(".page[data-page-number='" + e.pageNumber + "']").append('<div class="pdfcontrols" style="width:' + e.source.div.offsetWidth + 'px; height:' + e.source.div.offsetHeight + 'px"><canvas id="cpage' + e.pageNumber + '" width=' + (e.source.div.offsetWidth + 1) + ' height="' + (e.source.div.offsetHeight + 1) + '" style="width:' + (e.source.div.offsetWidth + 1) + 'px; height:' + (e.source.div.offsetHeight + 1) + 'px""></div>')
@@ -380,7 +451,7 @@ export class iDocsigneditorComponent implements OnInit {
           left: Math.ceil((ui.offset.left - $(this).offset().left) / that.scale),
           top: Math.ceil((ui.offset.top - $(this).offset().top) / that.scale)
         }
-        debugger
+
         let id = that.addControlsHtml({}, e.pageNumber, position, type);
         if (type == 'radio') {
           position.top += 20
@@ -394,16 +465,21 @@ export class iDocsigneditorComponent implements OnInit {
 
     $("#cpage" + e.pageNumber).bind('click', function (e) {
       e.preventDefault();
-      that.removeSelection();
+      if (that.controlStacks.length > 0) {
+        that.removeSelectionMultiselection();
+      } else {
+        that.removeSelection();
+      }
+
       return false;
     })
 
 
-    $("#cpage" + e.pageNumber).bind('click', function (e) {
-      e.preventDefault();
-      that.removeSelection();
-      return false;
-    })
+    // $("#cpage" + e.pageNumber).bind('click', function (e) {
+    //   e.preventDefault();
+    //   that.removeSelection();
+    //   return false;
+    // })
     let contextposition: any = { x: 0, y: 0 }
     $("#cpage" + e.pageNumber).bind("contextmenu", function (e) {
 
@@ -416,9 +492,17 @@ export class iDocsigneditorComponent implements OnInit {
         paste: {
           name: "Paste",
           icon: "fa-clipboard",
+          visible: function () { return that.mainContext.canPaste; },
           callback: function (key, opt) {
-
             that.paste(contextposition.x, contextposition.y)
+          }
+        },
+        delete: {
+          name: "Delete",
+          icon: "fa-trash",
+          visible: function () { return that.mainContext.canDelete; },
+          callback: function (key, opt) {
+            that.removeMultiple()
           }
         }
       }
@@ -526,7 +610,7 @@ export class iDocsigneditorComponent implements OnInit {
   totalpagesarr = [];
   totalpages = 0;
   loadComplete(pdf: PDFDocumentProxy): void {
-    debugger
+
     this.startAutoSave();
     this.totalpages = pdf.numPages;
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -695,7 +779,7 @@ export class iDocsigneditorComponent implements OnInit {
       }
       prop.dataset.value = prop.dataset.value || '';
       // control = this.createCheckBox(prop);
-      debugger
+
       control = new CheckBox(prop, style);
       control.props.dataset.require = false;
     }
@@ -761,7 +845,6 @@ export class iDocsigneditorComponent implements OnInit {
       if (findRecipient) {
         itm.color = findRecipient.color;
       }
-
       this.controlSet[control.props.id].setBgColor(itm.color);
     }
 
@@ -861,10 +944,12 @@ export class iDocsigneditorComponent implements OnInit {
     return id;
   }
 
+  controlStacks = [];
+
   controlClickHandler = function (d) {
+    if (!this.iscontrolcliked) this.removeSelectionMultiselection();
 
     let removeAddplus = null;
-
     if (this.selectedProps && this.selectedProps.dataset.group) {
       if (this.selectedProps.dataset.group == d.dataset.group) {
         removeAddplus = false
@@ -872,13 +957,25 @@ export class iDocsigneditorComponent implements OnInit {
         return false
       }
     }
+    if (this.iscontrolcliked) {
+      this.removePlus()
+      if (this.selectedControl) {
+        this.controlStacks.push(this.selectedControl)
+        this.selectedControl = null
+        this.selectedProps = null
+      }
+      this.mainContext.canDelete = true;
+      this.controlStacks.push(d)
+
+      $('#' + d.id).addClass('active')
+      return
+    }
 
     this.removeSelection();
     this.selectedControl = d;
     this.selectedProps = this.getExternalProp(this.selectedControl.dataset.page, this.selectedControl.id);
     this.addSelection(removeAddplus);
     this.onObjectSelected.emit(this.selectedProps);//
-
     this.showPropertiesF(d);
     return this.selectedProps;
   }
@@ -932,6 +1029,25 @@ export class iDocsigneditorComponent implements OnInit {
       }
       $('#' + this.selectedProps.id).addClass('active')
     }
+  }
+
+  removeSelectionMultiselection() {
+    if (this.controlStacks.length == 0) return;
+    for (let i = 0; i < this.controlStacks.length; i++) {
+      const element = this.controlStacks[i];
+      $('#' + element.id).removeClass('active');
+    }
+    this.mainContext.canDelete = false;
+    this.controlStacks = [];
+  }
+  removeMultiple() {
+    if (this.controlStacks.length == 0) return;
+    for (let i = 0; i < this.controlStacks.length; i++) {
+      const element = this.controlStacks[i];
+      this.removeControl(false, element)
+    }
+    this.mainContext.canDelete = false;
+    this.controlStacks = [];
   }
 
   removeSelection() {
@@ -1072,7 +1188,8 @@ export class iDocsigneditorComponent implements OnInit {
     var lastCopy = e || this.selectedProps || this.lastCopyElement;
     //this.selectedControl
     // this.selectedControl 
-    let props = JSON.parse(JSON.stringify(this.getExternalProp(lastCopy.dataset.page, lastCopy.id)));
+    let props = JSON.parse(JSON.stringify(lastCopy));
+    //let props = JSON.parse(JSON.stringify(this.getExternalProp(lastCopy.dataset.page, lastCopy.id)));
     let left = x || parseFloat(lastCopy.style.left);
     let top = y || parseFloat(lastCopy.style.top);
     let position = {
@@ -1261,13 +1378,21 @@ export class iDocsigneditorComponent implements OnInit {
     const element = item;//this.selectedField['prop'][i];
     if (element.key == 'text' || element.key == 'placeholder') {
       this.selectedProps.dataset[element.key] = element.value;
+      let color = '';
+      let text = ''
       if (element.key == 'text') {
         extprop[element.key] = element.value;
         extprop['val'] = element.value
+        text = (element.value || extprop.text || extprop.dataset.placeholder || '')
+        color = (!element.value && extprop.dataset.placeholder) ? '#959595' : '';
       } else if (element.key == 'placeholder') {
         extprop.dataset[element.key] = element.value;
+        color = (element.value && !extprop.text) ? '#959595' : '';
+        text = (extprop.text || element.value || extprop.dataset.placeholder || '')
       }
-      $('#' + this.selectedProps.id).find('span').text((element.value || extprop.dataset.placeholder || extprop.text || ''));
+
+      $('#' + this.selectedProps.id).css('color', color)
+      $('#' + this.selectedProps.id).find('span').text(text);
     }
     if (element.key == 'label') {
       $(`#${this.selectedProps.id}`).find('.label').text(element.value)
@@ -1398,7 +1523,6 @@ export class iDocsigneditorComponent implements OnInit {
         }
         this.setExternalProp(this.selectedProps.dataset.page, this.selectedProps.id, extprop);
         if (proptype == 'recipient') {
-          debugger
           this.controlSet[this.selectedProps.id].setBgColor(item.color);
         }
       }

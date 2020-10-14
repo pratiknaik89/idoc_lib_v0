@@ -14,6 +14,7 @@ export class Interactive {
         $("#" + that.props.id).draggable({
             refreshPositions: true,
             cursor: "move",
+            handles: 'n, e, s, w',
             start: function (event, ui) {
                 ui.position.left = 0;
                 ui.position.top = 0;

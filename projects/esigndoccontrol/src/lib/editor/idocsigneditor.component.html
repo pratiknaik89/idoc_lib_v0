@@ -70,21 +70,25 @@
 
     </div>
     <div class="toolbar_right">
-
+        <small><i *ngIf="lasterror" style="color: tomato;" class="fa fa-warning text-danger"> {{lasterror}}</i></small>
     </div>
 </div>
 <div class="content-document">
 
     <div class="leftbar" [style.height]="'calc(100vh - ' + reduceHeight +'px)'">
         <div class="barTitle" style="padding: 0;">
-            <h4 style="margin: 0px; padding: 10px; font-size: 14px;" [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">Fields</h4>
+            <h4 style="margin: 0px; padding: 10px; font-size: 14px;"
+                [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">Fields</h4>
             <!-- <app-ddl [items]="recipients" [(selectdItem)]="selectedRecipient.name"
                 (onChanged)="onReccipientChange($event)">
 
             </app-ddl> -->
             <div class="rec_item_holder">
-                <div class="rec_items" *ngFor="let item of recipients" [ngClass]="{'acts': item.name === selectedRecipient.name}">
-                    <div (click)="onReccipientChange(item)" style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;flex-direction: column;padding: 2px;" style.background="{{item.color}}">
+                <div class="rec_items" *ngFor="let item of recipients"
+                    [ngClass]="{'acts': item.name === selectedRecipient.name}">
+                    <div (click)="onReccipientChange(item)"
+                        style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;flex-direction: column;padding: 2px;"
+                        style.background="{{item.color}}">
                         <div class="icon">
                             <i class="fa fa-user-circle"></i>
                         </div>
@@ -101,11 +105,12 @@
             <li *ngFor="let obj of controlsfilter | groupBy:'group'">
                 <span class="grouptitle"
                     [ngStyle]="{'backgroundColor': toolbarBg, 'color':toolbarColor}">{{obj.key}}</span>
-                <ul class="toolsList">
+                <ul class="toolsList" [ngClass]="{'twoitems': v2}">
                     <li *ngFor="let item of obj.value" title="{{item.text}}" style="z-index: 99999;"
-                        data-type="{{item.type}}" class="draggable newelement">
+                        data-type="{{item.type}}" class="draggable newelement"
+                        [style.backgroundColor]="v2 ? selectedRecipient.color : 'transparent'">
                         <div class="icon" [ngStyle]="{'border-left': (item.isPro ? '2px dashed #E91E63' : '') }"
-                            [style.backgroundColor]="selectedRecipient.color">
+                            [style.backgroundColor]="!v2 ? selectedRecipient.color : 'transparent'">
                             <i class=" fa {{item.icon}}"></i></div>
                         <span class="text">{{item.text}}</span>
                     </li>
@@ -142,9 +147,15 @@
                         (click)="onPageClick(item.page)">
                         <span class="countbadge" *ngIf="item.count > 0">{{item.count}}</span>
                         <img src="data:image/jpeg;base64,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"
-                            style="width: 104px;">
+                            style="width: 83px;">
 
-                        <span class="pagenumber">{{item.page}}</span>
+                        <span class="pagenumber" style="position: absolute;
+                        bottom: 0;
+                        background: #cccccce6;
+                        width: 76px;
+                        padding: 5px;
+                        margin: 4px;
+                        font-weight: bold;">{{item.page}}</span>
                     </div>
                 </div>
 

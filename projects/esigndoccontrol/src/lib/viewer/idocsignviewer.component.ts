@@ -69,7 +69,7 @@ export class iDocsignviewerComponent implements OnInit {
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-        this.version = 'v0.0.28';
+        this.version = 'v0.0.30';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
@@ -577,22 +577,22 @@ export class iDocsignviewerComponent implements OnInit {
         } else if (type == controlType.initial) {
             control = this.createInitial(prop);
         } else if (type == controlType.signdate) {
-            const d = new Date('2010-08-05')
+            const d = new Date()
             const ye = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d)
             const mo = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(d)
             const da = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(d)
-            let datec = `${mo}/${da}/${ye}`
+            let datec = `${mo}-${da}-${ye}`
             if (prop.dataset.dateFormat) {
                 if (prop.dataset.dateFormat == 'mm-dd-yyyy') {
-                    datec = `${mo}/${da}/${ye}`
+                    datec = `${mo}-${da}-${ye}`
                 } else if (prop.dataset.dateFormat == 'dd-mm-yyyy') {
-                    datec = `${da}/${mo}/${ye}`
+                    datec = `${da}-${mo}-${ye}`
                 } else if (prop.dataset.dateFormat == 'yyyy-mm-dd') {
-                    datec = `${ye}/${mo}/${da}`
+                    datec = `${ye}-${mo}-${da}`
                 }
             }
-            prop.val = datec;
-            prop.text = datec;
+            prop.val = prop.val || datec;
+            prop.text = prop.text || datec;
             control = this.createSignatureDate(prop);
         } else if (type == controlType.note) {
             control = this.createNoteComp(prop);
@@ -1058,7 +1058,8 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     createTextBox(prop: Control) {
-        const design = '<input data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="'+ (prop.dataset.placeholder || '') +'" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
+        debugger
+        const design = '<input ' + (prop.dataset.maxlength ? 'maxlength="' + prop.dataset.maxlength + '"' : '') + ' data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="' + (prop.dataset.placeholder || '') + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
 
 
         // view only code
@@ -1141,17 +1142,18 @@ export class iDocsignviewerComponent implements OnInit {
     createSignatureDate(prop: Control) {
 
 
-        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px"><span>' + prop.text + '</span></div>';
+        const design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;border:0"><span>' + (prop.val || prop.text) + '</span></div>';
 
 
 
-        const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;border:0;"><span>' + prop.text + '</span></div>'
+        // const readonly_design = '<div tabindex="-1" data-access="' + this.getAccessKey(prop) + '" data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp viewercomp " style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;border:0!important;"><span>' + (prop.val || prop.text) + '</span></div>'
 
         const resize = null
 
         const isreadonly = (prop.dataset && prop.dataset.readonly) || prop.isviewonly;
         return {
-            design: (isreadonly ? readonly_design : design),
+            // design: (isreadonly ? readonly_design : design),
+            design: design,
             resize: resize
         }
 
@@ -1159,7 +1161,7 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     createNoteComp(prop: Control) {
-        const design = '<textarea data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="'+ (prop.dataset.placeholder || '') +'" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;resize: none;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</textarea>';
+        const design = '<textarea ' + (prop.dataset.maxlength ? 'maxlength="' + prop.dataset.maxlength + '"' : '') + ' data-access="' + this.getAccessKey(prop) + '"  data-name="' + prop.dataset.name + '" data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="' + (prop.dataset.placeholder || '') + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="display:none;left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;height:' + prop.style.height + 'px;resize: none;" ' + (prop.dataset.readonly ? 'readonly' : '') + '>' + (prop.val || prop.text) + '</textarea>';
 
         // view only code
 
@@ -1492,9 +1494,9 @@ export class iDocsignviewerComponent implements OnInit {
             return
         }
 
-        if(prop.type == controlType.sign){
+        if (prop.type == controlType.sign) {
             this.signaturename = this.signName.toString()
-        }else if(prop.type == controlType.initial){
+        } else if (prop.type == controlType.initial) {
             this.signaturename = this.initialName.toString()
         }
 
@@ -1528,6 +1530,7 @@ export class iDocsignviewerComponent implements OnInit {
                 text: "Clear",
                 "class": 'cancelButtonClass',
                 click: function () {
+                    that.signaturePad._isEmpty = true;
                     that.signaturePad.clear();
                 }
             },
@@ -1535,10 +1538,14 @@ export class iDocsignviewerComponent implements OnInit {
                 text: "Cancel",
                 "class": 'cancelButtonClass',
                 click: function () {
+                    that.signaturePad._isEmpty = true;
+                    that.signaturePad.clear();
+
                     $(this).dialog("close");
                 }
             }],
             close: function () {
+                that.signaturePad._isEmpty = true;
                 that.signaturePad.clear();
 
             }

@@ -16,6 +16,7 @@ export class Textbox extends BaseControl {
         props.dataset.fieldtype = props.dataset.fieldtype || 'none';
         props.style = { ...style, ...props.style };
         props.text = props.text || '';
+        props.dataset.placeholder = 'Textbox';
         props.dataset.maxlength = props.dataset.maxlength || 1000;
         props.dataset.require = props.dataset.require || true;
 
@@ -28,12 +29,12 @@ export class Textbox extends BaseControl {
     }
 
     private generateTemplate(prop) {
-        const design = '<div  data-readonly="' + prop.dataset.readonly + '" data-require="' + prop.dataset.require + '" data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp qtip tip-top" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;color:"><span>' + (prop.text || prop.dataset.placeholder || '') + '</span></div>';
+        const design = '<div  data-readonly="' + prop.dataset.readonly + '" data-require="' + prop.dataset.require + '" data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" class="defaultcomp qtip tip-top" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px;' + ((prop.dataset.placeholder && !prop.text) ? 'color:#959595;' : '') + '"><span>' + (prop.text || prop.dataset.placeholder || '') + '</span></div>';
         const resize = {
             minWidth: 50,
             maxWidth: 600,
             maxHeight: 100,
-            minHeight: 20,
+            minHeight: 14,
             resize: function (event, ui) {
                 // ui.size.height = ui.originalSize.height;
             }
