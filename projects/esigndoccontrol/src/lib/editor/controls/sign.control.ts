@@ -10,7 +10,7 @@ export class Sign extends BaseControl {
             'height': 50
           };
           props.style = { ...props.style, ...style };
-          props.dataset.require = props.dataset.require || true;
+          props.dataset.require = props.dataset.require == false ?  false : true;
 
     }
 

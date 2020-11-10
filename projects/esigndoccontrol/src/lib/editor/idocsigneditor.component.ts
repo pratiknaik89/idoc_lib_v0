@@ -171,7 +171,7 @@ export class iDocsigneditorComponent implements OnInit {
   constructor(private zone: ChangeDetectorRef) {
     this.controlsfilter = this.controls.filter(a => { return this.isPro ? true : !a.isPro });
     this.propBehaviour.fontFamily.values = this.options.fonts;
-    this.version = 'v0.0.30';
+    this.version = 'v0.0.31';
     // this message from master
     // this is camera branch
   }
@@ -354,9 +354,9 @@ export class iDocsigneditorComponent implements OnInit {
       if (e.keyCode == 91 || e.keyCode == 17) {
         that.iscontrolcliked = true;
       } else if (that.selectedControl) {
-        e.preventDefault();
         if (e.keyCode == 37 || e.keyCode == 39) // right  | left
         {
+          e.preventDefault();
           let itm = that.selectedField['prop'].find(a => {
             return a.key === 'left'
           })
@@ -371,6 +371,7 @@ export class iDocsigneditorComponent implements OnInit {
         }
         else if (e.keyCode == 40 || e.keyCode == 38) // key down | up
         {
+          e.preventDefault();
           let itm = that.selectedField['prop'].find(a => {
             return a.key === 'top'
           })
@@ -381,11 +382,7 @@ export class iDocsigneditorComponent implements OnInit {
           }
           that.updateProperties(itm)
           //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) - 1) + 'px'
-        } else if (e.keyCode == 8 || e.keyCode == 46) //Key up
-        {
-          that.removeControl();
-          //that.selectedControl.style['top'] = (parseFloat(that.selectedControl.style['top']) + 1) + 'px'
-        }
+        } 
       }
       return
     })
@@ -428,7 +425,7 @@ export class iDocsigneditorComponent implements OnInit {
 
   pageRendered(e) {
     let that = this;
-
+debugger
     console.log(e.pageNumber)
 
     //$(".page[data-page-number='" + e.pageNumber + "']").append('<div class="pdfcontrols" style="width:' + e.source.div.offsetWidth + 'px; height:' + e.source.div.offsetHeight + 'px"><canvas id="cpage' + e.pageNumber + '" width=' + (e.source.div.offsetWidth + 1) + ' height="' + (e.source.div.offsetHeight + 1) + '" style="width:' + (e.source.div.offsetWidth + 1) + 'px; height:' + (e.source.div.offsetHeight + 1) + 'px""></div>')
@@ -685,6 +682,9 @@ export class iDocsigneditorComponent implements OnInit {
 
   lastCopyElement = undefined;
   addControlsHtml(el, page, position, type, group = null, style = null, props = null, loadFromFile = false, defaultselected = true, iscopy = false) {
+    if(props.id == 1605006248077){
+      debugger
+    }
 
     let cprop = undefined;
     let cprops = undefined;

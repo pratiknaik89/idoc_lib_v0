@@ -1,0 +1,15 @@
+<span class="mult-button mult-component mult-fileupload-choose" pRipple (click)="choose()" (keydown.enter)="choose()"
+    tabindex="0">
+    <input #advt type="file" (change)="onFolderSelected($event)" webkitdirectory multiple />
+    <span [ngClass]="'mult-button-icon mult-button-icon-left'" [class]="chooseIcon"></span>
+    <span class="mult-button-label">Choose</span>
+</span>
+
+<div class="mult-fileupload-row" *ngFor="let file of files; let i = index;">
+    <div><img [src]="" /></div>
+    <div>{{file.name}}</div>
+    <div>{{formatSize(file.size)}}</div>
+    <div>
+        <button type="button" icon="pi pi-times" pButton (click)="remove($event,i)" [disabled]="uploading"></button>
+    </div>
+</div>

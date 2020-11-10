@@ -11,13 +11,15 @@ import { iViewerModule } from  'dist/esigndoccontrol'
 
 import { LibEditorComponent } from './libeditor/home.comp';
 import { LibViwerComponent } from './libviwer/home.comp';
+import { FileFolderComponent } from './fileupload_rnd/home.comp';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LibEditorComponent,
-    LibViwerComponent
+    LibViwerComponent,
+    FileFolderComponent
   ],
   imports: [
     BrowserModule,

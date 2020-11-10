@@ -16,9 +16,9 @@ export class Textbox extends BaseControl {
         props.dataset.fieldtype = props.dataset.fieldtype || 'none';
         props.style = { ...style, ...props.style };
         props.text = props.text || '';
-        props.dataset.placeholder = 'Textbox';
+        props.dataset.placeholder = props.dataset.placeholder ||  'Textbox';
         props.dataset.maxlength = props.dataset.maxlength || 1000;
-        props.dataset.require = props.dataset.require || true;
+        props.dataset.require = props.dataset.require == false ?  false : true;
 
     }
 

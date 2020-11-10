@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
+import { FileFolderComponent } from './fileupload_rnd/home.comp';
 import { LibEditorComponent } from './libeditor/home.comp';
 import { LibViwerComponent } from './libviwer/home.comp';
 
@@ -16,7 +17,11 @@ const routes: Routes = [
         path: 'libviwer',
         component: LibViwerComponent
 
-    }]
+    },{
+      path: 'folder_demo',
+      component: FileFolderComponent
+
+  }]
 }
 ];
 

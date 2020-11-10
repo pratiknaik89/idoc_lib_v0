@@ -16,8 +16,8 @@ export class Note extends BaseControl {
 
     props.style = { ...props.style, ...style };
     props.text = props.text || '';
-    props.dataset.placeholder = 'Textbox';
-    props.dataset.require = props.dataset.require || true;
+    props.dataset.placeholder = props.dataset.placeholder || 'Textbox';
+    props.dataset.require = props.dataset.require == false ?  false : true;
     props.dataset.maxlength = props.dataset.maxlength || 4000;
   }
 

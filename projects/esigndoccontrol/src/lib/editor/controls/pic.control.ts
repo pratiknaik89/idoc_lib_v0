@@ -10,7 +10,7 @@ export class Pic extends BaseControl {
       'height': 80
     };
     props.style = { ...props.style, ...style };
-    props.dataset.require = props.dataset.require || true;
+    props.dataset.require = props.dataset.require == false ?  false : true;
 
   }
 

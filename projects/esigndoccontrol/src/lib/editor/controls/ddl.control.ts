@@ -14,7 +14,7 @@ export class Dropdown extends BaseControl {
         }
         props.style = { ...props.style, ...style };
         props.text = props.text || 'Dropdown';
-        props.dataset.require = props.dataset.require || true;
+        props.dataset.require = props.dataset.require == false ?  false : true;
 
     }
 

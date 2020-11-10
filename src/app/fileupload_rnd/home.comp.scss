@@ -1,0 +1,42 @@
+    
+.mult-fileupload-content {
+    position: relative;
+}
+
+.mult-fileupload-row {
+    display: flex;
+    align-items: center;
+}
+
+.mult-fileupload-row > div {
+    flex: 1 1 auto;
+    width: 25%;
+}
+
+.mult-fileupload-row > div:last-child {
+    text-align: right;
+}
+
+.mult-fileupload-content .mult-progressbar {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.mult-button.mult-fileupload-choose {
+    position: relative;
+    overflow: hidden;
+}
+
+.mult-button.mult-fileupload-choose input[type=file] {
+    display: none;
+}
+
+.mult-fileupload-choose.mult-fileupload-choose-selected input[type=file] {
+    display: none;
+}
+
+.mult-fluid .mult-fileupload .mult-button {
+    width: auto;
+}
