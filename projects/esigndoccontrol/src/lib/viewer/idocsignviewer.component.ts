@@ -69,7 +69,7 @@ export class iDocsignviewerComponent implements OnInit {
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-        this.version = 'v0.0.31';
+        this.version = 'v0.0.32';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
