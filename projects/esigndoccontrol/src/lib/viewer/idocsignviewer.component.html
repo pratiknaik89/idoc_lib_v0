@@ -149,7 +149,7 @@
 <div id="signaturepad" style="display: none;width: auto;padding: 2px;min-width: 500px;">
 
     <my-tabs>
-        <!-- <my-tab [tabTitle]="'Choose'">
+        <my-tab [tabTitle]="'Choose'" *ngIf="signList.length > 0" [active]="tabindex == 1">
             <div class="thumbnailSignListWrapper">
                 <ul class="thumbnailSignList">
                     <li class="list" *ngFor="let item of signList" (click)="selectedSign(item)">
@@ -165,10 +165,9 @@
                 <i class="fa fa-pencil" style="font-size: 2em;"></i>
                 <span>No Signature</span>
             </div>
-        </my-tab> -->
-        <my-tab [tabTitle]="'Draw'" [active]="true">
-            <input class="form-control" (blur)="signatureSuggestion($event)" 
-            [(ngModel)]="signaturename" style="border: 1px solid #ccc;
+        </my-tab>
+        <my-tab [tabTitle]="'Draw'" [active]="tabindex == 2">
+            <input class="form-control" (blur)="signatureSuggestion($event)" [(ngModel)]="signaturename" style="border: 1px solid #ccc;
             padding: 6px;
             margin-bottom: 10px;
             width: 97%;

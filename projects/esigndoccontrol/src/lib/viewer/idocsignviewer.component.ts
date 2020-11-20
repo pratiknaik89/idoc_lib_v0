@@ -66,10 +66,11 @@ export class iDocsignviewerComponent implements OnInit {
     progress = 0;
     version = '';
     selectedProps: Control;
+    tabindex = 2
     constructor(private zone: ChangeDetectorRef) { }
 
     ngOnInit(): void {
-        this.version = 'v0.0.32';
+        this.version = 'v0.0.33';
         let d = localStorage.getItem(this.localStorageKey);
         if (d) {
             this.externalProp = JSON.parse(d);
@@ -105,6 +106,7 @@ export class iDocsignviewerComponent implements OnInit {
 
     // set Signature List
     public addSignatureList(signs: ISign[]) {
+        debugger
         this.listOfSigns = signs
     }
 
@@ -346,12 +348,14 @@ export class iDocsignviewerComponent implements OnInit {
     }
     selectedSign(item: ISign) {
         this.selSign = item;
+        this.signUploaded(true, item, this.selectedProps, false)
     }
 
-    signUploaded(status: boolean, item: ISign, control: Control) {
+    signUploaded(status: boolean, item: ISign, control: Control, news: boolean = true) {
         if (status) {
             $("#signaturepad").dialog('close');
-            this.selectedSign(item);
+            if (news)
+                this.selectedSign(item);
             this.signatureToggle(item.url, control.id)
             control.val = item.url;
             if (control.type == 'sign') {
@@ -657,6 +661,7 @@ export class iDocsignviewerComponent implements OnInit {
                         icon: "fa-clipboard",
                         callback: function (key, opt) {
                             that.IsForceOpenSignDialog = true;
+                            that.tabindex = 2;
                             that.signatureDialogHandler(null, prop)
                         }
                     }
@@ -672,6 +677,7 @@ export class iDocsignviewerComponent implements OnInit {
                 }
             });
             if ((!prop.dataset.readonly && !prop.isviewonly)) {
+                debugger
                 if (prop.dataset.type == 'sign') {
                     this.signList = this.listOfSigns;
                     this.signaturename = this.signName;
@@ -1058,7 +1064,7 @@ export class iDocsignviewerComponent implements OnInit {
     }
 
     createTextBox(prop: Control) {
-        debugger
+
         const design = '<input ' + (prop.dataset.maxlength ? 'maxlength="' + prop.dataset.maxlength + '"' : '') + ' data-access="' + this.getAccessKey(prop) + '"  data-fieldtype="' + prop.dataset.fieldtype + '"  data-name="' + prop.dataset.name + '"  data-page="' + prop.dataset.page + '" data-type="' + prop.dataset.type + '" id="' + prop.id + '" placeholder="' + (prop.dataset.placeholder || '') + '" class="defaultcomp viewercomp ' + (prop.dataset.require ? 'require' : '') + '" style="left:' + prop.style.left + 'px;top:' + prop.style.top + 'px;font-family:' + prop.style['fontFamily'] + ';font-size:' + prop.style['fontSize'] + 'px;font-style:' + prop.style['fontStyle'] + ';font-weight:' + prop.style['fontWeight'] + ';width:' + prop.style.width + 'px" ' + (prop.dataset.readonly ? 'readonly' : '') + '   value="' + (prop.val || prop.text) + '">';
 
 
@@ -1495,13 +1501,22 @@ export class iDocsignviewerComponent implements OnInit {
         }
 
         if (prop.type == controlType.sign) {
+            this.signList = this.listOfSigns;
             this.signaturename = this.signName.toString()
         } else if (prop.type == controlType.initial) {
+            this.signList = this.listOfInitials;
             this.signaturename = this.initialName.toString()
         }
 
 
         this.IsForceOpenSignDialog = false;
+        if (prop.type == 'sign' && this.signList.length > 0) {
+            this.tabindex = 1
+        } else if (prop.type == 'initial' && this.signList.length > 0) {
+            this.tabindex = 1
+        } else {
+            this.tabindex = 2
+        }
         $("#signaturepad").dialog({
             resizable: false,
             height: 400,

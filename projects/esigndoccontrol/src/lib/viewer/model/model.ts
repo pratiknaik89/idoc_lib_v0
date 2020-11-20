@@ -67,6 +67,7 @@ export interface Font {
 export interface ISign {
     name: string
     url: string
+    type?: string
 }
 
 export enum controlType {
