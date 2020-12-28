@@ -53,7 +53,7 @@ export class LibViwerComponent implements OnInit {
                 url: 'https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Rock+Salt&display=swap'
             }])
             //this.viewer.setVisibility('all', true , true)    
-            this.viewer.addSignatureList([{"name":"Sample","type":"sign", "url":"https://bucket-cmp2.s3.us-east-2.amazonaws.com/signature/ba857d22-2b17-11eb-ac5d-029cd58f3b70/initial_1605870890.png%22%7D,%7B%22name%22:%22Sample%22,%22emailid%22:%22moorthi@ideas2tech.com%22,%22type%22:%22signature%22,%22path%22:%22signature/ba857d22-2b17-11eb-ac5d-029cd58f3b70/signature_1605870851.png%22,%22s3path%22:%22https://bucket-cmp2.s3.us-east-2.amazonaws.com/signature/ba857d22-2b17-11eb-ac5d-029cd58f3b70/signature_1605870851.png%22%7D"}])
+            this.viewer.addSignatureList([{"name":"Sample","type":"sign", "url":"https://bucket-cmp2.s3.us-east-2.amazonaws.com/signature/ba857d22-2b17-11eb-ac5d-029cd58f3b70/signature_1605873966.png"}])
         }, 100);
 
     }
